@@ -1,55 +1,192 @@
-use digitex::Binary;
-use std::{fmt::Display, iter::repeat};
+use std::{
+    borrow::Borrow,
+    fmt::{Binary, Display, Write},
+    iter::{repeat, FromIterator},
+    ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Index, Not},
+};
 
 type Frame = u64;
 
 const ONES: u64 = std::u64::MAX;
+const TRUE: &'static bool = &true;
+const FALSE: &'static bool = &false;
 
 /// flexible heap-allocated bitset
 ///
 ///
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct BitSet {
     inner: Vec<Frame>,
+    // len: usize,
+}
+
+impl Binary for BitSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            f.write_str("0b")?;
+        }
+
+        for i in 0..self.len() {
+            if self[i] {
+                f.write_char('1')?;
+            } else {
+                f.write_char('0')?;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl Display for BitSet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for &frame in self.inner.iter() {
-            if frame == 0 {
-                f.write_str(&"0".repeat(1 << 6))?
-            } else {
-                write!(f, "{}", Binary::from_raw(frame))?
-            }
-        }
-        Ok(())
+        Binary::fmt(self, f)
     }
 }
 
 impl From<Vec<bool>> for BitSet {
     fn from(v: Vec<bool>) -> Self {
         let mut res = BitSet::with_capacity(v.len());
-        for (i, frame) in v.chunks(1 << 6).enumerate() {
-            for position in 0..(1 << 6) {
-                let idx = i * (1 << 6) + position;
-                if let Some(&val) = frame.get(position) {
-                    if val {
-                        res.entry(idx);
-                    }
-                }
-            }
+        for (x, _) in v.iter().enumerate().filter(|x| *x.1) {
+            res.entry(x);
         }
-
         res
     }
 }
 
-// impl Index<usize> for BitSet {
-//     type Output = bool;
-//     fn index(&self, idx: usize) -> &Self::Output {
-//         unimplemented!()
-//     }
-// }
+impl From<Vec<usize>> for BitSet {
+    fn from(v: Vec<usize>) -> Self {
+        v.into_iter().collect()
+    }
+}
+
+impl Index<usize> for BitSet {
+    type Output = bool;
+    fn index(&self, idx: usize) -> &Self::Output {
+        if self.get(idx) {
+            TRUE
+        } else {
+            FALSE
+        }
+    }
+}
+
+impl BitAndAssign<BitSet> for BitSet {
+    fn bitand_assign(&mut self, rhs: BitSet) {
+        for (a, b) in self.inner.iter_mut().zip(rhs.inner.iter()) {
+            *a &= b;
+        }
+    }
+}
+
+impl BitAndAssign<&BitSet> for BitSet {
+    fn bitand_assign(&mut self, rhs: &BitSet) {
+        for (a, b) in self.inner.iter_mut().zip(rhs.inner.iter()) {
+            *a &= b;
+        }
+    }
+}
+
+impl BitAnd<BitSet> for BitSet {
+    type Output = BitSet;
+    fn bitand(self, rhs: BitSet) -> Self::Output {
+        let mut res = self.clone();
+        res &= rhs;
+        res
+    }
+}
+
+impl BitAnd<BitSet> for &BitSet {
+    type Output = BitSet;
+    fn bitand(self, rhs: BitSet) -> Self::Output {
+        let mut res = self.clone();
+        res &= rhs;
+        res
+    }
+}
+
+impl BitOrAssign<BitSet> for BitSet {
+    fn bitor_assign(&mut self, rhs: BitSet) {
+        for (a, b) in self.inner.iter_mut().zip(rhs.inner.iter()) {
+            *a |= b;
+        }
+    }
+}
+
+impl BitOrAssign<&BitSet> for BitSet {
+    fn bitor_assign(&mut self, rhs: &BitSet) {
+        for (a, b) in self.inner.iter_mut().zip(rhs.inner.iter()) {
+            *a |= b;
+        }
+    }
+}
+
+impl BitOr<BitSet> for BitSet {
+    type Output = BitSet;
+    fn bitor(self, rhs: BitSet) -> Self::Output {
+        let mut res = self.clone();
+        res |= rhs;
+        res
+    }
+}
+
+impl BitOr<BitSet> for &BitSet {
+    type Output = BitSet;
+    fn bitor(self, rhs: BitSet) -> Self::Output {
+        let mut res = self.clone();
+        res |= rhs;
+        res
+    }
+}
+
+impl BitXorAssign<BitSet> for BitSet {
+    fn bitxor_assign(&mut self, rhs: BitSet) {
+        for (a, b) in self.inner.iter_mut().zip(rhs.inner.iter()) {
+            *a ^= b;
+        }
+    }
+}
+
+impl BitXorAssign<&BitSet> for BitSet {
+    fn bitxor_assign(&mut self, rhs: &BitSet) {
+        for (a, b) in self.inner.iter_mut().zip(rhs.inner.iter()) {
+            *a ^= b;
+        }
+    }
+}
+
+impl BitXor<BitSet> for BitSet {
+    type Output = BitSet;
+    fn bitxor(self, rhs: BitSet) -> Self::Output {
+        let mut res = self.clone();
+        res ^= rhs;
+        res
+    }
+}
+
+impl BitXor<BitSet> for &BitSet {
+    type Output = BitSet;
+    fn bitxor(self, rhs: BitSet) -> Self::Output {
+        let mut res = self.clone();
+        res ^= rhs;
+        res
+    }
+}
+
+impl Not for BitSet {
+    type Output = BitSet;
+    fn not(mut self) -> Self::Output {
+        self.negate();
+        self
+    }
+}
+
+impl Not for &BitSet {
+    type Output = BitSet;
+    fn not(self) -> Self::Output {
+        self.clone().not()
+    }
+}
 
 impl BitSet {
     pub fn new() -> Self {
@@ -62,39 +199,53 @@ impl BitSet {
         }
     }
 
+    pub fn from_iter(iter: impl Iterator<Item = usize>) -> Self {
+        let mut bs = BitSet::new();
+        for x in iter {
+            bs.entry(x);
+        }
+        bs
+    }
+
     pub fn frames(&self) -> usize {
         self.inner.len()
     }
 
     pub fn len(&self) -> usize {
-        self.frames() << 6
+        self.inner.len() * (1 << 6)
     }
 
     pub fn capacity(&self) -> usize {
         self.inner.capacity() << 6
     }
 
-    pub fn element_count(&self) -> usize {
+    pub fn count_ones(&self) -> usize {
         self.inner
             .iter()
             .fold(0, |sum, elem| sum + elem.count_ones() as usize)
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.element_count() == 0
-    }
+    // pub fn count_zeroes(&self) -> usize {
+    //     self.inner
+    //         .iter()
+    //         .fold(0, |sum, elem| sum + elem.count_zeros() as usize)
+    // }
 
-    fn double_len(&mut self) {
-        self.inner.extend(repeat(0).take(self.frames()));
+    pub fn is_empty(&self) -> bool {
+        self.count_ones() == 0
     }
 
     fn reserve_least(&mut self, least_idx: usize) {
         if self.len() == 0 {
             self.inner = vec![0; 1];
         }
-        while self.len() <= least_idx {
-            self.double_len();
+        while self.frames() * (1 << 6) <= least_idx {
+            self.inner.extend(repeat(0).take(self.frames()));
         }
+    }
+
+    pub fn truncate(&mut self, len: usize) {
+        self.inner.truncate(len);
     }
 
     pub fn get(&self, idx: usize) -> bool {
@@ -116,9 +267,115 @@ impl BitSet {
     }
 
     pub fn remove(&mut self, idx: usize) {
+        self.reserve_least(idx);
         let (frame, position) = frame_index(idx);
-        if let Some(f) = self.inner.get_mut(frame) {
-            *f &= ONES - (1 << position);
+        self.inner[frame] &= ONES ^ (1 << position);
+    }
+
+    pub fn set(&mut self, idx: usize, value: bool) {
+        if value {
+            self.entry(idx);
+        } else {
+            self.remove(idx);
+        }
+    }
+
+    pub fn iter(&self) -> BitSetIter<&Self> {
+        BitSetIter {
+            inner: self,
+            cur: 0,
+        }
+    }
+
+    pub fn negate(&mut self) {
+        for x in self.inner.iter_mut() {
+            *x = !*x;
+        }
+    }
+
+    pub fn is_subset(&self, other: &Self) -> bool {
+        if self.len() <= other.len() {
+            self.iter().all(|x| other[x])
+        } else {
+            other.iter().all(|x| self[x])
+        }
+    }
+
+    pub fn is_superset(&self, other: &Self) -> bool {
+        other.is_subset(self)
+    }
+
+    pub fn is_disjoint(&self, other: &Self) -> bool {
+        if self.len() <= other.len() {
+            self.iter().all(|x| !other[x])
+        } else {
+            other.iter().all(|x| !self[x])
+        }
+    }
+
+    pub fn union(&self, other: &Self) -> Self {
+        let mut res = self.clone();
+        res |= other;
+        res
+    }
+
+    pub fn intersection(&self, other: &Self) -> Self {
+        let mut res = self.clone();
+        res &= other;
+        res
+    }
+
+    pub fn difference(&self, other: &Self) -> Self {
+        let mut res = self.clone();
+        res &= !other;
+        res
+    }
+
+    pub fn symmetric_difference(&self, other: &Self) -> Self {
+        let mut res = self.clone();
+        res ^= other;
+        res
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct BitSetIter<B> {
+    inner: B,
+    cur: usize,
+}
+
+impl<B: Borrow<BitSet>> Iterator for BitSetIter<B> {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.cur < self.inner.borrow().len() && {
+            if self.inner.borrow()[self.cur] {
+                self.cur += 1;
+                return Some(self.cur - 1);
+            } else {
+                self.cur += 1;
+                true
+            }
+        } {}
+
+        None
+    }
+}
+
+impl FromIterator<usize> for BitSet {
+    fn from_iter<T: IntoIterator<Item = usize>>(iter: T) -> Self {
+        <Self>::from_iter(iter.into_iter())
+    }
+}
+
+impl IntoIterator for BitSet {
+    type Item = usize;
+    type IntoIter = BitSetIter<BitSet>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            inner: self,
+            cur: 0,
         }
     }
 }
@@ -129,8 +386,6 @@ impl BitSet {
 ///
 /// where idx == frame * 64 + position is always valid
 fn frame_index(idx: usize) -> (usize, usize) {
-    // (idx >> 6, (1 << 6) - (idx - (idx >> 6 << 6)))
-    // dbg!((1 << 6) - 1 - (idx + (1 << 6) - 1) % (1 << 6));
     (idx >> 6, (1 << 6) - (idx + (1 << 6) - 1) % (1 << 6) - 1)
 }
 
@@ -142,7 +397,7 @@ mod test {
     use rand::{thread_rng, Rng};
 
     #[test]
-    fn get() {
+    fn basic() {
         let mut bs = BitSet::new();
 
         bs.entry(1);
@@ -169,8 +424,8 @@ mod test {
             bs.entry(r);
         }
 
-        assert_eq!(pops.len(), bs.element_count());
-        assert!(pops.into_iter().all(|x| bs.get(x)));
+        assert_eq!(pops.len(), bs.count_ones());
+        assert!(pops.into_iter().all(|x| bs[x]));
     }
 
     #[test]
@@ -183,5 +438,21 @@ mod test {
             t.entry(3);
             t
         });
+    }
+
+    #[test]
+    fn iter() {
+        let mut bs = BitSet::new();
+        bs.entry(1);
+        bs.entry(2);
+        bs.entry(4);
+        bs.entry(5);
+
+        let mut iter = bs.iter();
+        assert_eq!(iter.next(), Some(1));
+        assert_eq!(iter.next(), Some(2));
+        assert_eq!(iter.next(), Some(4));
+        assert_eq!(iter.next(), Some(5));
+        assert_eq!(iter.next(), None);
     }
 }

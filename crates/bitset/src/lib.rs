@@ -5,9 +5,9 @@ use std::{
     ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Index, Not},
 };
 
-type Frame = u64;
+type Frame = u8;
 
-const ONES: u64 = std::u64::MAX;
+const ONES: u8 = std::u8::MAX;
 const TRUE: &'static bool = &true;
 const FALSE: &'static bool = &false;
 
@@ -212,7 +212,7 @@ impl BitSet {
 
     pub fn ones(len: usize) -> Self {
         Self {
-            inner: vec![std::u64::MAX; (len >> 6) + 1],
+            inner: vec![std::u8::MAX; (len >> 6) + 1],
         }
     }
 
@@ -229,11 +229,11 @@ impl BitSet {
     }
 
     pub fn len(&self) -> usize {
-        self.inner.len() * (1 << 6)
+        self.inner.len() * (1 << 3)
     }
 
     pub fn capacity(&self) -> usize {
-        self.inner.capacity() << 6
+        self.inner.capacity() << 3
     }
 
     pub fn count_ones(&self) -> usize {
@@ -256,13 +256,13 @@ impl BitSet {
         if self.len() == 0 {
             self.inner = vec![0; 1];
         }
-        while self.frames() * (1 << 6) <= least_idx {
+        while self.frames() * (1 << 3) <= least_idx {
             self.inner.extend(repeat(0).take(self.frames()));
         }
     }
 
     pub fn resize(&mut self, len: usize) {
-        self.inner.resize((len >> 6) + 1, 0);
+        self.inner.resize((len >> 3) + 1, 0);
     }
 
     pub fn truncate(&mut self, len: usize) {
@@ -411,7 +411,7 @@ impl IntoIterator for BitSet {
 ///
 /// where idx == frame * 64 + position is always valid
 fn frame_index(idx: usize) -> (usize, usize) {
-    (idx >> 6, (1 << 6) - (idx + (1 << 6) - 1) % (1 << 6) - 1)
+    (idx >> 3, (1 << 3) - (idx + (1 << 3) - 1) % (1 << 3) - 1)
 }
 
 #[cfg(test)]
@@ -428,8 +428,8 @@ mod test {
         bs.entry(1);
         bs.entry(3);
 
-        assert_eq!(bs.len(), 64);
-        assert_eq!(bs.inner, vec![(1 << 63) + (1 << 61)]);
+        assert_eq!(bs.len(), 8);
+        assert_eq!(bs.inner, vec![(1 << 7) + (1 << 5)]);
 
         bs.remove(3);
         bs.remove(1);

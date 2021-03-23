@@ -206,13 +206,13 @@ impl BitSet {
 
     pub fn zeros(len: usize) -> Self {
         Self {
-            inner: vec![0; (len >> 6) + 1],
+            inner: vec![0; (len >> 3) + 1],
         }
     }
 
     pub fn ones(len: usize) -> Self {
         Self {
-            inner: vec![std::u8::MAX; (len >> 6) + 1],
+            inner: vec![std::u8::MAX; (len >> 3) + 1],
         }
     }
 
@@ -409,7 +409,7 @@ impl IntoIterator for BitSet {
 ///
 /// returns (frame, position)
 ///
-/// where idx == frame * 64 + position is always valid
+/// where idx == frame * 8 + position is always valid
 fn frame_index(idx: usize) -> (usize, usize) {
     (idx >> 3, (1 << 3) - (idx + (1 << 3) - 1) % (1 << 3) - 1)
 }

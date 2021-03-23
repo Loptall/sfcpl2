@@ -15,7 +15,7 @@ impl Erathosthnes {
         table.remove(0);
 
         for i in (1..).take_while(|&x| x * x < n) {
-            if table[2 * i + 1] {
+            if table[i] {
                 primes.push(2 * i + 1);
                 for j in (2 * i * (i + 1)..)
                     .step_by(2 * i + 1)
@@ -29,12 +29,20 @@ impl Erathosthnes {
         Self { n, table, primes }
     }
 
+    pub fn len(&self) -> usize {
+        self.n
+    }
+
     pub fn is_prime(&self, x: usize) -> bool {
         if x & 1 != 0 {
             self.table[x / 2]
         } else {
             x == 2
         }
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<usize> {
+        self.primes.iter()
     }
 }
 
@@ -54,10 +62,5 @@ mod test {
         assert!(sieve.is_prime(7));
         assert!(!sieve.is_prime(8));
         assert!(!sieve.is_prime(9));
-    }
-
-    #[test]
-    fn big() {
-        let sieve = Erathosthnes::new(100000000);
     }
 }

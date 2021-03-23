@@ -46,7 +46,7 @@ impl Display for BitSet {
 
 impl From<Vec<bool>> for BitSet {
     fn from(v: Vec<bool>) -> Self {
-        let mut res = BitSet::with_capacity(v.len());
+        let mut res = BitSet::with_len(v.len());
         for (x, _) in v.iter().enumerate().filter(|x| *x.1) {
             res.entry(x);
         }
@@ -64,6 +64,17 @@ impl Index<usize> for BitSet {
     type Output = bool;
     fn index(&self, idx: usize) -> &Self::Output {
         if self.get(idx) {
+            TRUE
+        } else {
+            FALSE
+        }
+    }
+}
+
+impl Index<&usize> for BitSet {
+    type Output = bool;
+    fn index(&self, idx: &usize) -> &Self::Output {
+        if self.get(*idx) {
             TRUE
         } else {
             FALSE
@@ -193,10 +204,12 @@ impl BitSet {
         Self { inner: Vec::new() }
     }
 
-    pub fn with_capacity(size: usize) -> Self {
-        Self {
-            inner: Vec::with_capacity((size >> 6) + 1),
-        }
+    pub fn with_len(len: usize) -> Self {
+        let mut res = Self {
+            inner: Vec::with_capacity((len >> 6) + 1),
+        };
+        res.resize(len);
+        res
     }
 
     pub fn from_iter(iter: impl Iterator<Item = usize>) -> Self {
@@ -244,6 +257,10 @@ impl BitSet {
         }
     }
 
+    pub fn resize(&mut self, len: usize) {
+        self.inner.resize((len >> 6) + 1, 0);
+    }
+
     pub fn truncate(&mut self, len: usize) {
         self.inner.truncate(len);
     }
@@ -280,6 +297,10 @@ impl BitSet {
         }
     }
 
+    pub fn flip(&mut self, idx: usize) {
+        self.set(idx, !self.get(idx));
+    }
+
     pub fn iter(&self) -> BitSetIter<&Self> {
         BitSetIter {
             inner: self,
@@ -289,7 +310,7 @@ impl BitSet {
 
     pub fn negate(&mut self) {
         for x in self.inner.iter_mut() {
-            *x = !*x;
+            *x = x.swap_bytes();
         }
     }
 

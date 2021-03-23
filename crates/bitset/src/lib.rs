@@ -46,7 +46,7 @@ impl Display for BitSet {
 
 impl From<Vec<bool>> for BitSet {
     fn from(v: Vec<bool>) -> Self {
-        let mut res = BitSet::with_len(v.len());
+        let mut res = BitSet::zeros(v.len());
         for (x, _) in v.iter().enumerate().filter(|x| *x.1) {
             res.entry(x);
         }
@@ -204,12 +204,16 @@ impl BitSet {
         Self { inner: Vec::new() }
     }
 
-    pub fn with_len(len: usize) -> Self {
-        let mut res = Self {
-            inner: Vec::with_capacity((len >> 6) + 1),
-        };
-        res.resize(len);
-        res
+    pub fn zeros(len: usize) -> Self {
+        Self {
+            inner: vec![0; (len >> 6) + 1],
+        }
+    }
+
+    pub fn ones(len: usize) -> Self {
+        Self {
+            inner: vec![std::u64::MAX; (len >> 6) + 1],
+        }
     }
 
     pub fn from_iter(iter: impl Iterator<Item = usize>) -> Self {
@@ -238,7 +242,7 @@ impl BitSet {
             .fold(0, |sum, elem| sum + elem.count_ones() as usize)
     }
 
-    // pub fn count_zeroes(&self) -> usize {
+    // pub fn count_zeros(&self) -> usize {
     //     self.inner
     //         .iter()
     //         .fold(0, |sum, elem| sum + elem.count_zeros() as usize)

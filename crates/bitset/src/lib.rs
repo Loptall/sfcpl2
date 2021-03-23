@@ -49,6 +49,33 @@ impl Display for BitSet {
     }
 }
 
+impl From<&[u8]> for BitSet {
+    fn from(v: &[u8]) -> Self {
+        Self {
+            len: v.len() * CELL_SIZE,
+            inner: v.to_vec(),
+        }
+    }
+}
+
+impl From<Vec<u8>> for BitSet {
+    fn from(v: Vec<u8>) -> Self {
+        Self {
+            len: v.len() * CELL_SIZE,
+            inner: v,
+        }
+    }
+}
+
+impl From<&Vec<u8>> for BitSet {
+    fn from(v: &Vec<u8>) -> Self {
+        Self {
+            len: v.len() * CELL_SIZE,
+            inner: v.clone(),
+        }
+    }
+}
+
 impl From<Vec<bool>> for BitSet {
     fn from(v: Vec<bool>) -> Self {
         let mut res = BitSet::zeros(v.len());

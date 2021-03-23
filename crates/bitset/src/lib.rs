@@ -1,23 +1,28 @@
 use std::{
     borrow::Borrow,
     fmt::{Binary, Display, Write},
-    iter::{repeat, FromIterator},
+    iter::FromIterator,
     ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Index, Not},
 };
 
-type Frame = u8;
-
+type Cell = u8;
+const CELL_SIZE: usize = std::mem::size_of::<Cell>();
 const ONES: u8 = std::u8::MAX;
 const TRUE: &'static bool = &true;
 const FALSE: &'static bool = &false;
 
-/// flexible heap-allocated bitset
+/// bitset
+///
+/// - allow length which is not multiple of 8 (size u8)
+/// guarantee bits after len are always false
+///
+/// - allow trailing false
 ///
 ///
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct BitSet {
-    inner: Vec<Frame>,
-    // len: usize,
+    inner: Vec<Cell>,
+    len: usize,
 }
 
 impl Binary for BitSet {
@@ -81,6 +86,14 @@ impl Index<&usize> for BitSet {
         }
     }
 }
+
+impl PartialEq for BitSet {
+    fn eq(&self, other: &Self) -> bool {
+        self.is_subset(other) && other.is_subset(self)
+    }
+}
+
+impl Eq for BitSet {}
 
 impl BitAndAssign<BitSet> for BitSet {
     fn bitand_assign(&mut self, rhs: BitSet) {
@@ -187,7 +200,7 @@ impl BitXor<BitSet> for &BitSet {
 impl Not for BitSet {
     type Output = BitSet;
     fn not(mut self) -> Self::Output {
-        self.negate();
+        self.swap();
         self
     }
 }
@@ -200,97 +213,114 @@ impl Not for &BitSet {
 }
 
 impl BitSet {
-    pub fn new() -> Self {
-        Self { inner: Vec::new() }
+    /// create new BitSet filled with false
+    ///
+    /// alias to `BitSet::zeros(len)`
+    pub fn new(len: usize) -> Self {
+        Self::zeros(len)
     }
 
+    /// create new BitSet filled with false
     pub fn zeros(len: usize) -> Self {
         Self {
-            inner: vec![0; (len >> 3) + 1],
+            inner: vec![0; (len - 1 >> 3) + 1],
+            len,
         }
     }
 
+    /// create new BitSet filled with true
     pub fn ones(len: usize) -> Self {
         Self {
-            inner: vec![std::u8::MAX; (len >> 3) + 1],
+            inner: vec![ONES; (len - 1 >> 3) + 1],
+            len,
         }
     }
 
     pub fn from_iter(iter: impl Iterator<Item = usize>) -> Self {
-        let mut bs = BitSet::new();
-        for x in iter {
+        let buf: Vec<_> = iter.into_iter().collect();
+        let len = buf.iter().max().unwrap_or(&0) + 1;
+        let mut bs = BitSet::new(len);
+        for x in buf {
             bs.entry(x);
         }
         bs
     }
 
-    pub fn frames(&self) -> usize {
+    pub fn resize(&mut self, len: usize) {
+        self.inner.resize(len + 7 >> 3, 0);
+        self.len = len;
+    }
+
+    /// return length of inner cells
+    pub fn cell(&self) -> usize {
         self.inner.len()
     }
 
+    /// return length of bits which can be use
     pub fn len(&self) -> usize {
-        self.inner.len() * (1 << 3)
-    }
-
-    pub fn capacity(&self) -> usize {
-        self.inner.capacity() << 3
+        self.len
     }
 
     pub fn count_ones(&self) -> usize {
         self.inner
             .iter()
-            .fold(0, |sum, elem| sum + elem.count_ones() as usize)
+            .map(|&x| x.count_ones() as usize)
+            .sum::<usize>()
     }
 
-    // pub fn count_zeros(&self) -> usize {
-    //     self.inner
-    //         .iter()
-    //         .fold(0, |sum, elem| sum + elem.count_zeros() as usize)
-    // }
+    pub fn count_zeros(&self) -> usize {
+        self.inner
+            .iter()
+            .map(|&x| x.count_zeros() as usize)
+            .sum::<usize>()
+            - {
+                // zeros after len are ignored
+                let r = self.len() % CELL_SIZE;
+                if r != 0 {
+                    CELL_SIZE - r
+                } else {
+                    0
+                }
+            }
+    }
 
     pub fn is_empty(&self) -> bool {
         self.count_ones() == 0
     }
 
-    fn reserve_least(&mut self, least_idx: usize) {
-        if self.len() == 0 {
-            self.inner = vec![0; 1];
+    /// convert index in the way of cells
+    ///
+    /// returns (cell, position)
+    ///
+    /// where idx == cell * 8 + position is always valid
+    fn assert_index(&self, idx: usize) -> Option<(usize, usize)> {
+        if self.len() <= idx {
+            None
+        } else {
+            Some((idx >> 3, 7 - (idx % 8)))
         }
-        while self.frames() * (1 << 3) <= least_idx {
-            self.inner.extend(repeat(0).take(self.frames()));
-        }
-    }
-
-    pub fn resize(&mut self, len: usize) {
-        self.inner.resize((len >> 3) + 1, 0);
-    }
-
-    pub fn truncate(&mut self, len: usize) {
-        self.inner.truncate(len);
     }
 
     pub fn get(&self, idx: usize) -> bool {
-        let (frame, position) = frame_index(idx);
-        self.inner
-            .get(frame)
-            .map(|&f| f & (1 << position) != 0)
-            .expect(&format!(
-                "invalid index: len is {}, but index is {}",
-                self.len(),
-                idx
-            ))
+        if let Some((cell, position)) = self.assert_index(idx) {
+            self.inner[cell] & (1 << position) != 0
+        } else {
+            false // is it good idea to return false over index?
+        }
     }
 
     pub fn entry(&mut self, idx: usize) {
-        self.reserve_least(idx);
-        let (frame, position) = frame_index(idx);
-        self.inner[frame] |= 1 << position;
+        let (cell, position) = self.assert_index(idx).expect(
+            format!("invalid index: len is {}, but index is {}", self.len(), idx,).as_str(),
+        );
+        self.inner[cell] |= 1 << position;
     }
 
     pub fn remove(&mut self, idx: usize) {
-        self.reserve_least(idx);
-        let (frame, position) = frame_index(idx);
-        self.inner[frame] &= ONES ^ (1 << position);
+        let (cell, position) = self.assert_index(idx).expect(
+            format!("invalid index: len is {}, but index is {}", self.len(), idx,).as_str(),
+        );
+        self.inner[cell] &= ONES ^ (1 << position);
     }
 
     pub fn set(&mut self, idx: usize, value: bool) {
@@ -312,9 +342,20 @@ impl BitSet {
         }
     }
 
-    pub fn negate(&mut self) {
+    pub fn swap(&mut self) {
         for x in self.inner.iter_mut() {
             *x = x.swap_bytes();
+        }
+        self.chomp();
+    }
+
+    fn chomp(&mut self) {
+        // len == 5
+        // bytes = "10110/110" -> "10110/000"
+        // self & "11111/000"
+        let r = self.len() % CELL_SIZE;
+        if let Some(last) = self.inner.last_mut() {
+            *last &= ONES >> r << r;
         }
     }
 
@@ -405,15 +446,6 @@ impl IntoIterator for BitSet {
     }
 }
 
-/// convert index in the way of frames
-///
-/// returns (frame, position)
-///
-/// where idx == frame * 8 + position is always valid
-fn frame_index(idx: usize) -> (usize, usize) {
-    (idx >> 3, (1 << 3) - (idx + (1 << 3) - 1) % (1 << 3) - 1)
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::BTreeSet;
@@ -423,28 +455,28 @@ mod test {
 
     #[test]
     fn basic() {
-        let mut bs = BitSet::new();
+        let mut bs = BitSet::new(10);
 
         bs.entry(1);
         bs.entry(3);
 
-        assert_eq!(bs.len(), 8);
-        assert_eq!(bs.inner, vec![(1 << 7) + (1 << 5)]);
+        assert_eq!(bs.inner, vec![(1 << 6) + (1 << 4), 0]);
 
         bs.remove(3);
         bs.remove(1);
 
-        assert_eq!(bs.inner, vec![0]);
+        assert_eq!(bs.inner, vec![0, 0]);
     }
 
     #[test]
     fn large() {
-        let mut bs = BitSet::new();
+        let limit = 200000;
+        let mut bs = BitSet::new(limit);
         let mut rng = thread_rng();
 
         let mut pops = BTreeSet::new();
         for _ in (0..).take(10000) {
-            let r: usize = rng.gen_range(0..200000);
+            let r: usize = rng.gen_range(0..limit);
             pops.insert(r);
             bs.entry(r);
         }
@@ -458,7 +490,7 @@ mod test {
         let vec = vec![true, false, false, true];
         let bs: BitSet = vec.into();
         assert_eq!(bs, {
-            let mut t = BitSet::new();
+            let mut t = BitSet::new(4);
             t.entry(0);
             t.entry(3);
             t
@@ -467,17 +499,23 @@ mod test {
 
     #[test]
     fn iter() {
-        let mut bs = BitSet::new();
+        let mut bs = BitSet::new(10);
         bs.entry(1);
         bs.entry(2);
         bs.entry(4);
         bs.entry(5);
 
-        let mut iter = bs.iter();
-        assert_eq!(iter.next(), Some(1));
-        assert_eq!(iter.next(), Some(2));
-        assert_eq!(iter.next(), Some(4));
-        assert_eq!(iter.next(), Some(5));
-        assert_eq!(iter.next(), None);
+        let iter1 = bs.iter();
+        let mut iter2 = iter1.clone();
+        assert_eq!(iter2.next(), Some(1));
+        assert_eq!(iter2.next(), Some(2));
+        assert_eq!(iter2.next(), Some(4));
+        assert_eq!(iter2.next(), Some(5));
+        assert_eq!(iter2.next(), None);
+
+        let bs_from_iter: BitSet = iter1.collect();
+        // eprintln!("{}", bs);
+        // eprintln!("{}", bs_from_iter);
+        assert_eq!(bs, bs_from_iter);
     }
 }

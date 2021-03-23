@@ -1,7 +1,7 @@
 /// convert a slice by run length encoding
 ///
 /// return Vec<(T, usize)> where usize is continuous elements count
-pub fn rle<T: Clone + PartialEq>(v: &[T]) -> Vec<(T, usize)> {
+fn rle<T: Clone + PartialEq>(v: &[T]) -> Vec<(T, usize)> {
     let mut res = Vec::new();
     let mut count = 0;
     let mut last = None;

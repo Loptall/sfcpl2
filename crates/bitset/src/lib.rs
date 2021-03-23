@@ -6,7 +6,7 @@ use std::{
 };
 
 type Cell = u8;
-const CELL_SIZE: usize = std::mem::size_of::<Cell>();
+const CELL_SIZE: usize = std::mem::size_of::<Cell>() * 8;
 const ONES: u8 = std::u8::MAX;
 const TRUE: &'static bool = &true;
 const FALSE: &'static bool = &false;
@@ -46,6 +46,86 @@ impl Binary for BitSet {
 impl Display for BitSet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Binary::fmt(self, f)
+    }
+}
+
+impl From<usize> for BitSet {
+    fn from(x: usize) -> Self {
+        let inner = (0..std::mem::size_of::<usize>())
+            .map(|i| {
+                (x << i * CELL_SIZE
+                    >> i * CELL_SIZE
+                    >> CELL_SIZE * (std::mem::size_of::<usize>() - 1 - i)) as u8
+            })
+            .collect();
+        Self {
+            inner,
+            len: std::mem::size_of::<usize>() * CELL_SIZE,
+        }
+    }
+}
+
+impl From<u64> for BitSet {
+    fn from(x: u64) -> Self {
+        let inner = (0..std::mem::size_of::<u64>())
+            .map(|i| {
+                (x << i * CELL_SIZE
+                    >> i * CELL_SIZE
+                    >> CELL_SIZE * (std::mem::size_of::<u64>() - 1 - i)) as u8
+            })
+            .collect();
+        Self {
+            inner,
+            len: std::mem::size_of::<u64>() * CELL_SIZE,
+        }
+    }
+}
+
+impl From<u32> for BitSet {
+    fn from(x: u32) -> Self {
+        let inner = (0..std::mem::size_of::<u32>())
+            .map(|i| {
+                (x << i * CELL_SIZE
+                    >> i * CELL_SIZE
+                    >> CELL_SIZE * (std::mem::size_of::<u32>() - 1 - i)) as u8
+            })
+            .collect();
+        Self {
+            inner,
+            len: std::mem::size_of::<u32>() * CELL_SIZE,
+        }
+    }
+}
+
+impl From<u16> for BitSet {
+    fn from(x: u16) -> Self {
+        let inner = (0..std::mem::size_of::<u16>())
+            .map(|i| {
+                (x << i * CELL_SIZE
+                    >> i * CELL_SIZE
+                    >> CELL_SIZE * (std::mem::size_of::<u16>() - 1 - i)) as u8
+            })
+            .collect();
+        Self {
+            inner,
+            len: std::mem::size_of::<u16>() * CELL_SIZE,
+        }
+    }
+}
+
+impl From<u8> for BitSet {
+    fn from(x: u8) -> Self {
+        let inner = (0..std::mem::size_of::<u8>())
+            .map(|i| {
+                (x << i * CELL_SIZE
+                    >> i * CELL_SIZE
+                    >> CELL_SIZE * (std::mem::size_of::<u8>() - 1 - i)) as u8
+            })
+            .collect();
+        Self {
+            inner,
+            len: std::mem::size_of::<u8>() * CELL_SIZE,
+        }
     }
 }
 
@@ -113,6 +193,17 @@ impl Index<&usize> for BitSet {
         }
     }
 }
+
+// impl<B> Index<B> for BitSet
+// where
+//     B: RangeBounds<usize>,
+// {
+//     type Output;
+
+//     fn index(&self, index: RangeBounds<usize>) -> &Self::Output {
+//         todo!()
+//     }
+// }
 
 impl PartialEq for BitSet {
     fn eq(&self, other: &Self) -> bool {
@@ -247,6 +338,28 @@ impl BitSet {
         Self::zeros(len)
     }
 
+    pub fn clear(&mut self) {
+        if let Some((last, elems)) = self.inner.split_last_mut() {
+            for el in elems {
+                *el = 0;
+            }
+
+            *last = 0;
+        }
+    }
+
+    pub fn fill(&mut self) {
+        if let Some((last, elems)) = self.inner.split_last_mut() {
+            for el in elems {
+                *el = ONES;
+            }
+
+            *last = ONES;
+        }
+
+        self.chomp();
+    }
+
     /// create new BitSet filled with false
     pub fn zeros(len: usize) -> Self {
         Self {
@@ -324,13 +437,13 @@ impl BitSet {
         if self.len() <= idx {
             None
         } else {
-            Some((idx >> 3, 7 - (idx % 8)))
+            Some((idx / 8, idx % 8))
         }
     }
 
     pub fn get(&self, idx: usize) -> bool {
         if let Some((cell, position)) = self.assert_index(idx) {
-            self.inner[cell] & (1 << position) != 0
+            self.inner[cell] & (1 << 7 >> position) != 0
         } else {
             false // is it good idea to return false over index?
         }
@@ -340,14 +453,14 @@ impl BitSet {
         let (cell, position) = self.assert_index(idx).expect(
             format!("invalid index: len is {}, but index is {}", self.len(), idx,).as_str(),
         );
-        self.inner[cell] |= 1 << position;
+        self.inner[cell] |= 1 << 7 >> position;
     }
 
     pub fn remove(&mut self, idx: usize) {
         let (cell, position) = self.assert_index(idx).expect(
             format!("invalid index: len is {}, but index is {}", self.len(), idx,).as_str(),
         );
-        self.inner[cell] &= ONES ^ (1 << position);
+        self.inner[cell] &= ONES ^ (1 << 7 >> position);
     }
 
     pub fn set(&mut self, idx: usize, value: bool) {
@@ -544,5 +657,14 @@ mod test {
         // eprintln!("{}", bs);
         // eprintln!("{}", bs_from_iter);
         assert_eq!(bs, bs_from_iter);
+    }
+
+    #[test]
+    fn from_uint() {
+        let mut bs = BitSet::new(64);
+        bs.entry(8);
+        bs.entry(63);
+        let from_usize = ((1usize << 55) + (1usize)).into();
+        assert_eq!(bs, from_usize);
     }
 }

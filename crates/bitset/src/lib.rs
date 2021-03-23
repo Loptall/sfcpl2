@@ -386,6 +386,20 @@ impl BitSet {
         bs
     }
 
+    pub fn from_uint_with_len<T: Into<usize>>(x: T, len: usize) -> Self {
+        let x: usize = x.into();
+        if x >> len != 0 {
+            panic!("given integer has standing bit out of lower given length")
+        }
+        let mut res = Self::zeros(len);
+        for i in 0..len {
+            if x & (1usize << i) != 0 {
+                res.entry(res.len - i - 1);
+            }
+        }
+        res
+    }
+
     pub fn resize(&mut self, len: usize) {
         self.inner.resize(len + 7 >> 3, 0);
         self.len = len;

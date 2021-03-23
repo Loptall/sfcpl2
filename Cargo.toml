@@ -12,6 +12,7 @@ brute-bits = { path = "./crates/brute-bits" }
 digitex = { path = "./crates/digitex" }
 prime = { path = "./crates/prime" }
 rle = { path = "./crates/rle" }
+unique-count = { path = "./crates/unique-count" }
 
 [dev-dependencies]
 rand = "0.8.3"

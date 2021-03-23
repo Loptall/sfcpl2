@@ -3,3 +3,4 @@ pub use brute_bits::BruteBitsBuilder;
 pub use digitex::{Binary, Decimal, Digit, DigitBase, Hexdecimal, Octal};
 pub use prime::{erathosthnes::Erathosthnes, SelfIsPrime as _, SieveIsPrime as _};
 pub use rle::RunLengthEncoding as _;
+pub use unique_count::UniqueCount as _;

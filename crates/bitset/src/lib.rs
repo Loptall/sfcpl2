@@ -370,10 +370,12 @@ impl BitSet {
 
     /// create new BitSet filled with true
     pub fn ones(len: usize) -> Self {
-        Self {
+        let mut res = Self {
             inner: vec![ONES; (len - 1 >> 3) + 1],
             len,
-        }
+        };
+        res.chomp();
+        res
     }
 
     pub fn from_iter(iter: impl Iterator<Item = usize>) -> Self {

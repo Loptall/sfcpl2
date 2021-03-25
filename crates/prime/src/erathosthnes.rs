@@ -11,8 +11,8 @@ pub struct Erathosthnes {
 impl Erathosthnes {
     pub fn new(n: usize) -> Self {
         // table[i] = if 2 * i + 1 is prime
-        let n = dbg!((n + 1) / 2);
-        let mut table = dbg!(BitSet::ones(n));
+        let n = (n + 1) / 2;
+        let mut table = BitSet::ones(n);
         // let mut primes = Vec::new();
         table.remove(0);
         // primes.push(2);

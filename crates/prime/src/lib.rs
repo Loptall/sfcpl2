@@ -4,17 +4,26 @@ pub mod erathosthnes;
 pub trait SieveIsPrime<T> {
     /// return whether self is prime with pre-initialized sieve
     fn is_prime(&self, x: T) -> bool;
+    fn primes(&mut self) -> Box<dyn Iterator<Item = usize>>;
 }
 
 impl<T: Into<usize>> SieveIsPrime<T> for atkin::Atkin {
     fn is_prime(&self, x: T) -> bool {
         self.is_prime(x.into())
     }
+
+    fn primes(&mut self) -> Box<dyn Iterator<Item = usize>> {
+        unimplemented!()
+    }
 }
 
 impl<T: Into<usize>> SieveIsPrime<T> for erathosthnes::Erathosthnes {
     fn is_prime(&self, x: T) -> bool {
         self.is_prime(x.into())
+    }
+
+    fn primes(&mut self) -> Box<dyn Iterator<Item = usize>> {
+        Box::new(<Self>::primes(self))
     }
 }
 

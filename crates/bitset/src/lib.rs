@@ -516,6 +516,7 @@ impl BitSet {
         // bytes = "10110/110" -> "10110/000"
         // self & "11111/000"
         let r = CELL_SIZE - self.len() % CELL_SIZE;
+        let r = if r == CELL_SIZE { 0 } else { r };
         if let Some(last) = self.inner.last_mut() {
             *last &= ONES >> r << r;
         }

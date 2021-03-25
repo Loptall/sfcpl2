@@ -1,6 +1,6 @@
 use std::{
     borrow::Borrow,
-    fmt::{Binary, Display, Write},
+    fmt::{Binary, Debug, Display, Write},
     iter::FromIterator,
     ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Index, Not},
 };
@@ -19,7 +19,7 @@ const FALSE: &'static bool = &false;
 /// - allow trailing false
 ///
 ///
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct BitSet {
     inner: Vec<Cell>,
     len: usize,
@@ -44,6 +44,12 @@ impl Binary for BitSet {
 }
 
 impl Display for BitSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Binary::fmt(self, f)
+    }
+}
+
+impl Debug for BitSet {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Binary::fmt(self, f)
     }
@@ -509,7 +515,7 @@ impl BitSet {
         // len == 5
         // bytes = "10110/110" -> "10110/000"
         // self & "11111/000"
-        let r = self.len() % CELL_SIZE;
+        let r = CELL_SIZE - self.len() % CELL_SIZE;
         if let Some(last) = self.inner.last_mut() {
             *last &= ONES >> r << r;
         }

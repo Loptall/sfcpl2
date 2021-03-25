@@ -51,10 +51,7 @@ impl Atkin {
         }
         for y in (3..).step_by(6).take_while(|x| x * x < n) {
             for &z in &[1, 2] {
-                for x in (z..)
-                    .step_by(3)
-                {
-
+                for x in (z..).step_by(3) {
                     let m = 4 * x * x + y * y;
                     if x * x >= n || m > n {
                         break;

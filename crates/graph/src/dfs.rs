@@ -7,6 +7,7 @@ pub trait Dfsable<'a, V, N>: Sized {
 pub struct Dfs<'a, G: Dfsable<'a, V, N>, V, N> {
     graph: &'a G,
     visited: V,
+    start: N,
     stack: Vec<(N, Option<N>)>,
 }
 
@@ -37,13 +38,16 @@ impl<'a, D: Direct> Iterator for Dfs<'a, UnweightedListGraph<D>, Vec<bool>, usiz
 }
 
 impl<'a, D: Direct> Dfs<'a, UnweightedListGraph<D>, Vec<bool>, usize> {
+    pub fn start(&self) -> usize {
+        self.start
+    }
+
     pub fn find<F: Fn(usize) -> bool>(&mut self, f: F) -> Option<usize> {
         for (_, to) in self {
             if f(to) {
                 return Some(to);
             }
         }
-
         None
     }
 }
@@ -59,6 +63,7 @@ impl<'a, D: Direct> Dfsable<'a, Vec<bool>, usize> for UnweightedListGraph<D> {
         Dfs {
             graph: self,
             visited,
+            start,
             stack,
         }
     }

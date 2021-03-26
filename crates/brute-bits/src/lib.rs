@@ -1,17 +1,10 @@
-use bitset::BitSet;
-
-/// generates bitset
+/// generates `Vec<bool>`
 ///
 /// ```ignore
-/// use bit_enum::BitSetIter;
-///
-/// for bs in BitSetIter::new(3) {
+/// for bs in BruteBitsBuilder::new(3) {
 ///    // bs iterate from [false, false, false] to [true, true, true]
 /// }
 /// ```
-///
-/// # Panic
-/// If `size > 64`, usize will overflow and panic
 #[derive(Debug, Copy, Clone)]
 pub struct BruteBitsBuilder {
     size: usize,
@@ -32,7 +25,7 @@ impl BruteBitsBuilder {
 }
 
 impl IntoIterator for BruteBitsBuilder {
-    type Item = BitSet;
+    type Item = Vec<bool>;
     type IntoIter = BruteBits;
     fn into_iter(self) -> Self::IntoIter {
         BruteBits {
@@ -49,14 +42,19 @@ pub struct BruteBits {
 }
 
 impl Iterator for BruteBits {
-    type Item = BitSet;
+    type Item = Vec<bool>;
     fn next(&mut self) -> Option<Self::Item> {
         if self.current == (1 << self.size) {
             None
         } else {
-            let res = Some(BitSet::from_uint_with_len(self.current, self.size));
+            let mut res = vec![false; self.size];
+            for i in 0..self.size {
+                if (1 << i) & self.current != 0 {
+                    res[i] = true;
+                }
+            }
             self.current += 1;
-            res
+            Some(res)
         }
     }
 }
@@ -69,14 +67,14 @@ mod test {
     fn bs_iter() {
         let mut bs = BruteBitsBuilder::new(3).into_iter();
 
-        assert_eq!(Some(vec![false, false, false].into()), bs.next());
-        assert_eq!(Some(vec![false, false, true].into()), bs.next());
-        assert_eq!(Some(vec![false, true, false].into()), bs.next());
-        assert_eq!(Some(vec![false, true, true].into()), bs.next());
-        assert_eq!(Some(vec![true, false, false].into()), bs.next());
-        assert_eq!(Some(vec![true, false, true].into()), bs.next());
-        assert_eq!(Some(vec![true, true, false].into()), bs.next());
-        assert_eq!(Some(vec![true, true, true].into()), bs.next());
+        assert_eq!(Some(vec![false, false, false]), dbg!(bs.next()));
+        assert_eq!(Some(vec![true, false, false]), dbg!(bs.next()));
+        assert_eq!(Some(vec![false, true, false]), dbg!(bs.next()));
+        assert_eq!(Some(vec![true, true, false]), dbg!(bs.next()));
+        assert_eq!(Some(vec![false, false, true]), dbg!(bs.next()));
+        assert_eq!(Some(vec![true, false, true]), dbg!(bs.next()));
+        assert_eq!(Some(vec![false, true, true]), dbg!(bs.next()));
+        assert_eq!(Some(vec![true, true, true]), dbg!(bs.next()));
         assert_eq!(None, bs.next());
     }
 }

@@ -1,7 +1,8 @@
 pub mod bfs;
 pub mod dfs;
+pub mod dijkstra;
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ops::Add};
 
 // pub trait Graph<N: Eq, E: Eq> {
 //     fn nodes(&self) -> usize;
@@ -32,21 +33,21 @@ pub trait Weigh<T> {
 }
 
 pub struct Unweighted;
-pub struct Weighted<T> {
-    phantom: PhantomData<T>,
+pub struct Weighted<S> {
+    phantom: PhantomData<S>,
 }
 
 impl Weigh<usize> for Unweighted {
     const WEIGHTED: bool = false;
 }
 
-impl<T> Weigh<T> for Weighted<T> {
+impl<S> Weigh<S> for Weighted<S> {
     const WEIGHTED: bool = true;
 }
 
-pub struct ListGraph<T, D: Direct, W: Weigh<T>> {
+pub struct ListGraph<S, D: Direct, W: Weigh<S>> {
     _phantom: (PhantomData<D>, PhantomData<W>),
-    inner: Vec<Vec<T>>,
+    inner: Vec<Vec<S>>,
 }
 
 pub type UnweightedListGraph<D> = ListGraph<usize, D, Unweighted>;
@@ -54,10 +55,10 @@ pub type UnweightedListGraph<D> = ListGraph<usize, D, Unweighted>;
 pub type UndirectedUnweightedListGraph = UnweightedListGraph<Undirected>;
 pub type DirectedUnweightedListGraph = UnweightedListGraph<Directed>;
 
-pub type WeightedListGraph<T, D> = ListGraph<(usize, T), D, Weighted<T>>;
+pub type WeightedListGraph<S, D> = ListGraph<(usize, S), D, Weighted<S>>;
 
-pub type UndirectedWeightedListGraph<T> = WeightedListGraph<T, Undirected>;
-pub type DirectedWeightedListGraph<T> = WeightedListGraph<T, Directed>;
+pub type UndirectedWeightedListGraph<S> = WeightedListGraph<S, Undirected>;
+pub type DirectedWeightedListGraph<S> = WeightedListGraph<S, Directed>;
 
 impl<D: Direct> UnweightedListGraph<D> {
     pub fn new(n: usize) -> Self {
@@ -96,6 +97,61 @@ impl DirectedUnweightedListGraph {
         let mut res = Self::new(n);
         for &(from, to) in edges {
             res.add_edge(from, to);
+        }
+        res
+    }
+}
+
+impl<S, D> WeightedListGraph<S, D>
+where
+    Weighted<S>: Weigh<(usize, S)>,
+    S: Clone + Add + Ord,
+    D: Direct,
+{
+    pub fn new(n: usize) -> Self {
+        Self {
+            _phantom: (PhantomData, PhantomData),
+            inner: vec![Vec::new(); n],
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+}
+
+impl<S> UndirectedWeightedListGraph<S>
+where
+    Weighted<S>: Weigh<(usize, S)>,
+    S: Clone + Add + Ord,
+{
+    pub fn add_edge(&mut self, from: usize, to: usize, weight: S) {
+        self.inner[from].push((to, weight.clone()));
+        self.inner[to].push((from, weight));
+    }
+
+    pub fn from_edges(n: usize, edges: &[(usize, usize, S)]) -> Self {
+        let mut res = Self::new(n);
+        for (from, to, weight) in edges.iter().cloned() {
+            res.add_edge(from, to, weight);
+        }
+        res
+    }
+}
+
+impl<S> DirectedWeightedListGraph<S>
+where
+    Weighted<S>: Weigh<(usize, S)>,
+    S: Clone + Add + Ord,
+{
+    pub fn add_edge(&mut self, from: usize, to: usize, weight: S) {
+        self.inner[from].push((to, weight));
+    }
+
+    pub fn from_edges(n: usize, edges: &[(usize, usize, S)]) -> Self {
+        let mut res = Self::new(n);
+        for (from, to, weight) in edges.iter().cloned() {
+            res.add_edge(from, to, weight);
         }
         res
     }

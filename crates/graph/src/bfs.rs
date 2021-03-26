@@ -8,7 +8,7 @@ pub trait Bfsable<'a, V, N>: Sized {
 
 pub struct Bfs<'a, G: Bfsable<'a, V, N>, V, N> {
     graph: &'a G,
-    visited: V,
+    distance: V,
     start: N,
     queue: VecDeque<(N, Option<N>)>,
 }
@@ -20,13 +20,13 @@ impl<'a, D: Direct> Iterator for Bfs<'a, UnweightedListGraph<D>, Vec<Option<usiz
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some((u, prev)) = self.queue.pop_front() {
-            let visited = self.visited.clone();
+            let distance = self.distance.clone();
             for &neighbor in self.graph.inner[u]
                 .iter()
-                .filter(|&&x| visited[x].is_none())
+                .filter(|&&x| distance[x].is_none())
             {
-                if self.visited[neighbor].is_none() {
-                    self.visited[neighbor] = Some(self.visited[u].unwrap() + 1);
+                if self.distance[neighbor].is_none() {
+                    self.distance[neighbor] = Some(self.distance[u].unwrap() + 1);
                     self.queue.push_back((neighbor, Some(u)));
                 }
             }
@@ -62,7 +62,7 @@ impl<'a, D: Direct> Bfs<'a, UnweightedListGraph<D>, Vec<Option<usize>>, usize> {
         }
         for (_, to) in self.into_iter() {
             if to == goal {
-                return self.visited[goal];
+                return self.distance[goal];
             }
         }
         None
@@ -73,13 +73,13 @@ impl<'a, D: Direct> Bfs<'a, UnweightedListGraph<D>, Vec<Option<usize>>, usize> {
 
 impl<'a, D: Direct> Bfsable<'a, Vec<Option<usize>>, usize> for UnweightedListGraph<D> {
     fn bfs(&'a self, start: usize) -> Bfs<'a, Self, Vec<Option<usize>>, usize> {
-        let mut visited = vec![None; self.len()];
-        visited[start] = Some(0);
+        let mut distance = vec![None; self.len()];
+        distance[start] = Some(0);
         let mut queue = VecDeque::new();
         queue.push_back((start, None));
         Bfs {
             graph: self,
-            visited,
+            distance,
             start,
             queue,
         }

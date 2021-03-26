@@ -16,3 +16,5 @@ unique-count = { path = "./crates/unique-count" }
 
 [dev-dependencies]
 rand = "0.8.3"
+ac-library-rs-parted = { git = "https://github.com/qryxip/ac-library-rs-parted.git" }
+proconio = "0.4.2"

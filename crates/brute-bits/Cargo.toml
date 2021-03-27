@@ -1,7 +1,8 @@
 [package]
 name = "brute-bits"
 version = "0.1.0"
-authors = [ "Yuta Sadamori <yutapypy0930@gmail.com>",]
+authors = ["Yuta Sadamori <yutapypy0930@gmail.com>"]
+description = "enumerate all bits combination"
 edition = "2018"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Loptall/sfcpl2"

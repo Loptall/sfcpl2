@@ -1,6 +1,6 @@
 pub mod bfs;
 pub mod dfs;
-pub mod dijkstra;
+// pub mod dijkstra;
 
 use std::{marker::PhantomData, ops::Add};
 

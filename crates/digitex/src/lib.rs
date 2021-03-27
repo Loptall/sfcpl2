@@ -4,9 +4,7 @@ mod dynamic;
 pub use dynamic::Digit as DynamicDigit;
 
 mod r#static;
-pub use r#static::{
-    Bin, Binary, Dec, Decimal, Digit as StaticDigit, DigitBase, Hex, Hexdecimal, Oct, Octal,
-};
+pub use r#static::Digit as StaticDigit;
 
 pub(crate) fn into(mut n: u64, d: u32) -> Vec<u32> {
     let mut res = Vec::new();

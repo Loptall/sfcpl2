@@ -24,10 +24,10 @@ impl<const BASE: u32> Display for Digit<BASE> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let v = self.convert();
         for c in v {
-            if c < 10 {
+            if BASE <= 10 {
                 write!(f, "{}", c)?
             } else {
-                write!(f, "{}", ('A' as u8 + c as u8 - 10) as char)?
+                unimplemented!("how to display?")
             }
         }
 
@@ -51,8 +51,5 @@ mod test {
     fn stringify_test() {
         let octal = Digit::<8>::new(134);
         assert_eq!(octal.to_string(), "206");
-
-        let hex = Digit::<16>::new(28);
-        assert_eq!(hex.to_string(), "1C");
     }
 }

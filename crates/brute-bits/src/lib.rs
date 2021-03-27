@@ -14,14 +14,6 @@ impl BruteBitsBuilder {
     pub fn new(n: usize) -> Self {
         Self { size: n }
     }
-
-    // pub fn len(&self) -> usize {
-    //     self.size
-    // }
-
-    // pub fn combinations(&self) -> usize {
-    //     1 << self.size
-    // }
 }
 
 impl IntoIterator for BruteBitsBuilder {
@@ -35,6 +27,7 @@ impl IntoIterator for BruteBitsBuilder {
     }
 }
 
+/// light iterator
 #[derive(Copy, Clone, Debug)]
 pub struct BruteBits {
     size: usize,

@@ -1,13 +1,11 @@
 [package]
 name = "prime"
 version = "0.1.0"
-authors = [ "Yuta Sadamori <yutapypy0930@gmail.com>",]
+authors = ["Yuta Sadamori <yutapypy0930@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Loptall/sfcpl2"
 
 [dev-dependencies]
 rand = "0.8.3"
-
-[dependencies.bitset]
-path = "./../bitset"
+bitset = { path = "/../../bitset" }

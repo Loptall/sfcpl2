@@ -7,6 +7,6 @@ pub use graph::{
     DirectedUnweightedListGraph, ListGraph, UndirectedUnweightedListGraph, UnweightedListGraph,
 };
 pub use prime::{erathosthnes::Erathosthnes, Prime as _, Sieve as _};
-pub use rle::RunLengthEncoding as _;
+pub use run_length_encoding::RunLengthEncoding as _;
 pub use sparse_table::{Band, Max, Min, SparseTable};
 pub use unique_count::UniqueCount as _;

@@ -17,7 +17,7 @@ brute-bits = { path = "./crates/brute-bits" }
 digitex = { path = "./crates/digitex", features = ["atcoder"] }
 graph = { path = "./crates/graph" }
 prime = { path = "./crates/prime" }
-rle = { path = "./crates/rle" }
+run-length-encoding = { path = "./crates/run-length-encoding" }
 rolling-hash = { path = "./crates/rolling-hash" }
 sparse-table = { path = "./crates/sparse-table" }
 unique-count = { path = "./crates/unique-count" }

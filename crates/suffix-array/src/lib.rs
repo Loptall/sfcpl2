@@ -11,6 +11,14 @@ impl Sort for DefaultSort {
     }
 }
 
+struct SaIs;
+impl Sort for SaIs {
+    fn sort<T: Ord>(_v: &mut [T]) {
+        todo!()
+    }
+}
+
+/// String index
 pub struct SuffixArray<'a, S> {
     phantom: PhantomData<S>,
     raw: &'a str,
@@ -18,6 +26,15 @@ pub struct SuffixArray<'a, S> {
 }
 
 impl<'a, S: Sort> SuffixArray<'a, S> {
+    /// build suffix array from &str
+    ///
+    /// sort all suffixes of `s`
+    ///
+    /// Complexity: O(SK)
+    ///
+    /// where
+    /// - S = complexity of sort algorythm
+    /// - K = length(s)
     pub fn new(s: &'a str) -> Self {
         let mut inner = Vec::new();
         for i in 0..s.len() {
@@ -48,6 +65,11 @@ impl<'a, S: Sort> SuffixArray<'a, S> {
     /// Returns all start index where t appears in s.
     ///
     /// Be careful that returned vector is not sorted.
+    ///
+    /// Complexity: O(log K)
+    ///
+    /// where
+    /// - K = length(s)
     pub fn find<A: AsRef<str>>(&self, t: A) -> Vec<usize> {
         let t = t.as_ref();
         let n = self.len();

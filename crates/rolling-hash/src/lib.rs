@@ -192,6 +192,9 @@ mod test {
         for _ in 0..10000 {
             let mut a = rng.gen_range(0..=n);
             let mut b = rng.gen_range(0..=n);
+            if a == b {
+                continue;
+            }
             if b < a {
                 std::mem::swap(&mut a, &mut b);
             }

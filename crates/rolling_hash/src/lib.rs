@@ -90,7 +90,11 @@ impl<B: Base, T> RollingHash<B, T> {
         self.hash_sub(from, to)
     }
 
-    pub fn longest_common_prefix<R: RangeBounds<usize>>(&self, range1: R, range2: R) -> &[T] {
+    pub fn longest_common_prefix<R1, R2>(&self, range1: R1, range2: R2) -> &[T]
+    where
+        R1: RangeBounds<usize>,
+        R2: RangeBounds<usize>,
+    {
         let (from1, to1) = expand_range(range1, self.len());
         let (from2, to2) = expand_range(range2, self.len());
         let mut l = 0;
@@ -106,7 +110,11 @@ impl<B: Base, T> RollingHash<B, T> {
         &self.raw[from1..from1 + l]
     }
 
-    pub fn same<R: RangeBounds<usize>>(&self, range1: R, range2: R) -> bool {
+    pub fn same<R1, R2>(&self, range1: R1, range2: R2) -> bool
+    where
+        R1: RangeBounds<usize>,
+        R2: RangeBounds<usize>,
+    {
         let (from1, to1) = expand_range(range1, self.len());
         let (from2, to2) = expand_range(range2, self.len());
 
@@ -181,7 +189,7 @@ mod test {
         let n = s.len();
         let rh = RollingHash::<Base2, _>::from_str(s.clone()); // from chars
 
-        for _ in 0..100000 {
+        for _ in 0..10000 {
             let mut a = rng.gen_range(0..=n);
             let mut b = rng.gen_range(0..=n);
             if b < a {
@@ -206,7 +214,8 @@ mod test {
         assert_eq!(rh.longest_common_prefix(0.., 4..), []);
         assert_eq!(
             rh.longest_common_prefix(4.., 6..),
-            ['1', '0', '1', '0', '1', '0',]
+            ['1', '0', '1', '0', '1', '0']
         );
+        assert_eq!(rh.longest_common_prefix(4..6, 6..), ['1', '0']);
     }
 }

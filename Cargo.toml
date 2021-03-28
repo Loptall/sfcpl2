@@ -19,6 +19,7 @@ graph = { path = "./crates/graph" }
 prime = { path = "./crates/prime" }
 rle = { path = "./crates/rle" }
 rolling-hash = { path = "./crates/rolling-hash" }
+sparse-table = { path = "./crates/sparse-table" }
 unique-count = { path = "./crates/unique-count" }
 
 [dev-dependencies]

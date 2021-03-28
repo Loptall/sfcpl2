@@ -1,5 +1,5 @@
 [package]
-name = "rolling_hash"
+name = "rolling-hash"
 version = "0.1.0"
 authors = ["Yuta Sadamori <yutapypy0930@gmail.com>"]
 edition = "2018"

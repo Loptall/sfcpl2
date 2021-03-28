@@ -15,8 +15,10 @@ members = ["crates/*"]
 bitset = { path = "./crates/bitset" }
 brute-bits = { path = "./crates/brute-bits" }
 digitex = { path = "./crates/digitex", features = ["atcoder"] }
+graph = { path = "./crates/graph" }
 prime = { path = "./crates/prime" }
 rle = { path = "./crates/rle" }
+rolling-hash = { path = "./crates/rolling-hash" }
 unique-count = { path = "./crates/unique-count" }
 
 [dev-dependencies]

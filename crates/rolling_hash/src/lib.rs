@@ -48,7 +48,7 @@ fn expand_range<R: RangeBounds<usize>>(range: R, max: usize) -> (usize, usize) {
 fn powering(base: u64, n: usize) -> Vec<u64> {
     let mut pow_of_base = vec![1];
     (0..n).fold(1, |prd, _| {
-        let next = prd * base % MOD;
+        let next = (prd as u128 * base as u128 % MOD as u128) as u64;
         pow_of_base.push(next);
         next
     });
@@ -162,7 +162,7 @@ impl<B: Base> RollingHash<B, char> {
 
 #[cfg(test)]
 mod test {
-    use super::{Base, RollingHash};
+    use super::{Base, RandomBase, RollingHash};
     use rand::{thread_rng, Rng};
 
     /// to debug
@@ -207,7 +207,7 @@ mod test {
     #[test]
     fn lcp() {
         let s = "010010101010";
-        let rh = RollingHash::<Base2, _>::from_str(s);
+        let rh = RollingHash::<RandomBase, _>::from_str(s);
         assert_eq!(rh.longest_common_prefix(0.., 1..), []);
         assert_eq!(rh.longest_common_prefix(0.., 2..), ['0']);
         assert_eq!(rh.longest_common_prefix(0.., 3..), ['0', '1', '0']);

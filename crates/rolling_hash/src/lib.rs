@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, ops::RangeBounds};
+use std::{cmp::min, marker::PhantomData, ops::RangeBounds};
 
 use rand::{thread_rng, Rng};
 
@@ -91,7 +91,19 @@ impl<B: Base, T> RollingHash<B, T> {
     }
 
     pub fn longest_common_prefix<R: RangeBounds<usize>>(&self, range1: R, range2: R) -> &[T] {
-        unimplemented!()
+        let (from1, to1) = expand_range(range1, self.len());
+        let (from2, to2) = expand_range(range2, self.len());
+        let mut l = 0;
+        let mut r = min(to1 - from1, to2 - from2) + 1;
+        while l + 1 < r {
+            let m = (l + r) / 2;
+            if self.hash(from1..from1 + m) == self.hash(from2..from2 + m) {
+                l = m;
+            } else {
+                r = m;
+            }
+        }
+        &self.raw[from1..from1 + l]
     }
 
     pub fn same<R: RangeBounds<usize>>(&self, range1: R, range2: R) -> bool {
@@ -182,5 +194,19 @@ mod test {
 
             assert_eq!(rh.same(a..b, c..d), dbg!(&s[a..b]) == dbg!(&s[c..d]));
         }
+    }
+
+    #[test]
+    fn lcp() {
+        let s = "010010101010";
+        let rh = RollingHash::<Base2, _>::from_str(s);
+        assert_eq!(rh.longest_common_prefix(0.., 1..), []);
+        assert_eq!(rh.longest_common_prefix(0.., 2..), ['0']);
+        assert_eq!(rh.longest_common_prefix(0.., 3..), ['0', '1', '0']);
+        assert_eq!(rh.longest_common_prefix(0.., 4..), []);
+        assert_eq!(
+            rh.longest_common_prefix(4.., 6..),
+            ['1', '0', '1', '0', '1', '0',]
+        );
     }
 }

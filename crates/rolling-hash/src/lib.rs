@@ -1,6 +1,7 @@
 use std::{cmp::min, marker::PhantomData, ops::RangeBounds};
 
 use rand::{thread_rng, Rng};
+use util::expand_range;
 
 const MOD: u64 = (1 << 61) - 1;
 
@@ -29,20 +30,6 @@ impl<B: Base, S: AsRef<str>> From<S> for RollingHash<B, char> {
     fn from(s: S) -> Self {
         Self::from_str(s)
     }
-}
-
-fn expand_range<R: RangeBounds<usize>>(range: R, max: usize) -> (usize, usize) {
-    let from = match range.start_bound() {
-        std::ops::Bound::Included(&from) => from,
-        std::ops::Bound::Excluded(&from) => from + 1,
-        std::ops::Bound::Unbounded => 0,
-    };
-    let to = match range.end_bound() {
-        std::ops::Bound::Included(&end) => end + 1,
-        std::ops::Bound::Excluded(&end) => end,
-        std::ops::Bound::Unbounded => max,
-    };
-    (from, to)
 }
 
 fn powering(base: u64, n: usize) -> Vec<u64> {

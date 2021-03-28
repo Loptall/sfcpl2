@@ -4,6 +4,8 @@ use std::{
     ops::RangeBounds,
 };
 
+use util::{ceil_pow, expand_range};
+
 /// Binary operation which applies,
 ///
 /// - Associativity (結合則): f(f(x, y), z) == f(x, f(y, z)),
@@ -96,24 +98,6 @@ impl<B: Band> SparseTable<B> {
         let (from, to) = expand_range(range, self.len());
         self.fold_sub(from, to)
     }
-}
-
-fn ceil_pow(n: usize) -> usize {
-    n.next_power_of_two().trailing_zeros() as usize
-}
-
-fn expand_range<R: RangeBounds<usize>>(range: R, max: usize) -> (usize, usize) {
-    let from = match range.start_bound() {
-        std::ops::Bound::Included(&from) => from,
-        std::ops::Bound::Excluded(&from) => from + 1,
-        std::ops::Bound::Unbounded => 0,
-    };
-    let to = match range.end_bound() {
-        std::ops::Bound::Included(&end) => end + 1,
-        std::ops::Bound::Excluded(&end) => end,
-        std::ops::Bound::Unbounded => max,
-    };
-    (from, to)
 }
 
 #[cfg(test)]

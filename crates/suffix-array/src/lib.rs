@@ -8,22 +8,18 @@ pub trait Sort<T> {
 }
 
 #[derive(Debug)]
-struct DefaultSort;
+pub struct DefaultSort;
 impl<T: Ord> Sort<T> for DefaultSort {
     fn sort(s: &[T]) -> Vec<usize> {
-        let mut inner = Vec::new();
-        for i in 0..s.len() {
-            inner.push(&s[i..]);
-        }
-
-        inner.sort();
-        inner.into_iter().map(|t| s.len() - t.len()).collect()
+        let mut inner = (0..=s.len()).collect::<Vec<_>>();
+        inner.sort_by_key(|&x| &s[x..]);
+        inner
     }
 }
 
 #[derive(Debug)]
-struct SaIs;
-impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
+pub struct SaIs;
+impl<T: Ord + BoundedBelow + Clone> Sort<T> for SaIs {
     fn sort(s: &[T]) -> Vec<usize> {
         fn induced_sort<U: Ord + BoundedBelow + Clone>(
             s: &[U],
@@ -171,6 +167,41 @@ impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
 }
 
 /// String index
+///
+/// `self.inner` include all suffix of `self.raw`, include empty string and its own.
+///
+/// takes 2 type parameters T and S.
+/// where.
+///
+/// - T = element's type of slice, espetialy `char` if str is given.
+/// - S = algorythm to sort the suffix, SA-IS is linear implementation
+///
+/// ```
+/// use suffix_array::{SuffixArray, SaIs};
+///
+/// let s = "abracadabra";
+/// assert_eq!(s.len(), 11);
+///
+/// let sa = SuffixArray::<char, SaIs>::from_str(s);
+/// assert_eq!(sa.len(), 12);
+///
+/// assert_eq!(
+///     sa.suffix_array(),
+///     vec![
+///         11, // ""
+///         10, // "a"
+///         7,  // "abra"
+///         0,  // "abracadabra"
+///         3,  // "acadabra"
+///         5,  // "adabra"
+///         8,  // "bra"
+///         1,  // "bracadabra"
+///         4,  // "cadabra"
+///         6,  // "dabra"
+///         9,  // "ra"
+///         2,  // "racadabra"
+///     ]);
+/// ```
 #[derive(Debug)]
 pub struct SuffixArray<T, S> {
     phantom: PhantomData<S>,
@@ -179,9 +210,10 @@ pub struct SuffixArray<T, S> {
 }
 
 impl<T: Ord + Clone, S: Sort<T>> SuffixArray<T, S> {
-    /// build suffix array from &str
+    /// Build suffix array from &str
     ///
-    /// sort all suffixes of `s`
+    /// If you want to build from str type,
+    /// you can use 1SuffixArray::from_str()1
     ///
     /// Complexity: O(SK)
     ///
@@ -189,22 +221,35 @@ impl<T: Ord + Clone, S: Sort<T>> SuffixArray<T, S> {
     /// - S = complexity of sort algorythm
     /// - K = length(s)
     pub fn new(s: &[T]) -> Self {
+        let inner = S::sort(s);
         Self {
             phantom: PhantomData,
             raw: s.to_vec(),
-            inner: S::sort(s),
+            inner,
         }
     }
 
+    /// Returns raw slice given first
     pub fn raw(&self) -> &[T] {
         &self.raw
     }
 
+    /// Length of `self.inner`
+    ///
+    /// This is equal to `self.raw.len() + 1`, because `self.inner` includes all suffix.
+    /// Be careful that this is not same to `raw.len()`
     pub fn len(&self) -> usize {
-        self.raw.len()
+        self.inner.len()
     }
 
-    fn suffix_nth(&self, n: usize) -> &[T] {
+    /// Returns nth suffix.
+    ///
+    /// 0th = always "" (empty string)
+    ///
+    /// # Panic
+    ///
+    /// If n >= self.len()
+    pub fn suffix_nth(&self, n: usize) -> &[T] {
         &self.raw[self.inner[n]..]
     }
 
@@ -221,50 +266,58 @@ impl<T: Ord + Clone, S: Sort<T>> SuffixArray<T, S> {
     ///
     /// where
     /// - K = length(s)
-    pub fn find<V: IntoVec<T>>(&self, t: V) -> Vec<usize> {
+    pub fn find<V: IntoVec<T>>(&self, t: V) -> &[usize] {
         let t = t.into();
         let n = self.len();
-        let mut l = 0;
-        let mut r = n;
-        while l + 1 < r {
-            let m = (l + r) / 2;
+        let mut l1 = 0;
+        let mut r1 = n;
+        while l1 + 1 < r1 {
+            let m = (l1 + r1) / 2;
             if self.suffix_nth(m) < &t {
-                l = m;
+                l1 = m;
             } else {
-                r = m;
+                r1 = m;
             }
         }
 
-        (r..n)
-            .map(|x| self.suffix_nth(x))
-            .take_while(|&s| s.starts_with(&t))
-            .map(|s| n - s.len())
-            .collect()
+        let mut l2 = r1;
+        let mut r2 = n;
+        while l2 + 1 < r2 {
+            let m = (l2 + r2) / 2;
+            if self.suffix_nth(m).starts_with(&t) {
+                l2 = m;
+            } else {
+                r2 = m;
+            }
+        }
+
+        &self.inner[r1..r2]
     }
 }
 
 impl<S: Sort<char>> SuffixArray<char, S> {
-    pub fn from_str(s: &String) -> Self {
+    pub fn from_str(s: &str) -> Self {
         let t = s.chars().collect::<Vec<char>>();
+        let inner = S::sort(&t);
         Self {
             phantom: PhantomData,
-            inner: S::sort(&t),
             raw: t,
+            inner,
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    // use proconio::input;
-
     use super::{DefaultSort, SaIs, SuffixArray};
+
     #[test]
     fn basic() {
         let s = "abracadabra".to_string();
         let suffix_array = SuffixArray::<char, DefaultSort>::from_str(&s);
         assert_eq!(suffix_array.find("br"), vec![8, 1]);
         assert_eq!(suffix_array.find("abra"), vec![7, 0]);
+        assert_eq!(suffix_array.find("r"), vec![9, 2]);
 
         let s = "mmiissiissiippii".to_string();
         let suffix_array = SuffixArray::<char, DefaultSort>::from_str(&s);
@@ -279,6 +332,7 @@ mod test {
         let suffix_array = SuffixArray::<char, SaIs>::from_str(&s);
         assert_eq!(suffix_array.find("br"), vec![8, 1]);
         assert_eq!(suffix_array.find("abra"), vec![7, 0]);
+        assert_eq!(suffix_array.find("r"), vec![9, 2]);
 
         let s = "mmiissiissiippii".to_string();
         let suffix_array = SuffixArray::<char, SaIs>::from_str(&s);

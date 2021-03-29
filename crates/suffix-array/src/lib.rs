@@ -1,31 +1,35 @@
 use std::{collections::BTreeMap, marker::PhantomData};
 
 use unique_count::UniqueCount as _;
-use util::Shuffle as _;
+use util::{BoundedBelow, IntoVec, Shuffle as _};
 
-pub trait Sort {
-    fn sort(s: &str) -> Vec<&str>;
+pub trait Sort<T> {
+    fn sort(s: &[T]) -> Vec<usize>;
 }
 
 #[derive(Debug)]
 struct DefaultSort;
-impl Sort for DefaultSort {
-    fn sort(s: &str) -> Vec<&str> {
+impl<T: Ord> Sort<T> for DefaultSort {
+    fn sort(s: &[T]) -> Vec<usize> {
         let mut inner = Vec::new();
         for i in 0..s.len() {
             inner.push(&s[i..]);
         }
 
         inner.sort();
-        inner
+        inner.into_iter().map(|t| s.len() - t.len()).collect()
     }
 }
 
 #[derive(Debug)]
 struct SaIs;
-impl Sort for SaIs {
-    fn sort(s: &str) -> Vec<&str> {
-        fn induced_sort(s: &[char], types: &[bool], seed: Vec<usize>) -> Vec<usize> {
+impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
+    fn sort(s: &[T]) -> Vec<usize> {
+        fn induced_sort<U: Ord + BoundedBelow + Clone>(
+            s: &[U],
+            types: &[bool],
+            seed: Vec<usize>,
+        ) -> Vec<usize> {
             let is_lms = |x: &usize| *x != 0 && types[*x] == S && types[*x - 1] == L;
             let is_l = |x: &usize| types[*x];
             let is_s = |x: &usize| !types[*x];
@@ -45,23 +49,24 @@ impl Sort for SaIs {
             };
 
             // find lms
-            let mut inserted_lms = BTreeMap::<char, usize>::new();
+            let mut inserted_lms = BTreeMap::<U, usize>::new();
             for i in seed {
                 res[bin[&s[i]].1 - 1 - {
-                    let h = inserted_lms.entry(s[i]).or_default();
+                    let h = inserted_lms.entry(s[i].clone()).or_default();
                     let r = *h;
                     *h += 1;
                     r
                 }] = Some(i);
             }
+            dbg!(&res);
 
             // find L
-            let mut inserted_l = BTreeMap::<char, usize>::new();
+            let mut inserted_l = BTreeMap::<U, usize>::new();
             for i in 0..n {
                 if let Some(x) = res[i] {
                     if x > 0 && is_l(&(x - 1)) {
                         res[bin[&s[x - 1]].0 + {
-                            let h = inserted_l.entry(s[x - 1]).or_default();
+                            let h = inserted_l.entry(s[x - 1].clone()).or_default();
                             let r = *h;
                             *h += 1;
                             r
@@ -73,14 +78,15 @@ impl Sort for SaIs {
                     }
                 }
             }
+            dbg!(&res);
 
             // rfind S
-            let mut inserted_s = BTreeMap::<char, usize>::new();
+            let mut inserted_s = BTreeMap::<U, usize>::new();
             for i in (0..n).rev() {
                 if let Some(x) = res[i] {
                     if x > 0 && is_s(&(x - 1)) {
                         res[bin[&s[x - 1]].1 - 1 - {
-                            let h = inserted_s.entry(s[x - 1]).or_default();
+                            let h = inserted_s.entry(s[x - 1].clone()).or_default();
                             let r = *h;
                             *h += 1;
                             r
@@ -88,6 +94,7 @@ impl Sort for SaIs {
                     }
                 }
             }
+            dbg!(&res);
 
             res.into_iter().filter_map(|x| x).collect()
         }
@@ -95,8 +102,9 @@ impl Sort for SaIs {
         const L: bool = true;
         const S: bool = false;
 
-        let raw = s;
-        let s = format!("{}$", s).chars().collect::<Vec<char>>();
+        let mut s = s.to_vec();
+        s.push(T::min_value());
+        let s = s;
         let n = s.len();
 
         // determine s[i] is L or S, L: true, S: false
@@ -119,14 +127,17 @@ impl Sort for SaIs {
 
         // first sort
         eprintln!("first sort");
+        dbg!(&s);
+        dbg!(&types);
+        dbg!(&seed);
         let res = induced_sort(&s, &types, seed);
 
-        // let lms = (0..n).filter(is_lms).collect::<Vec<_>>();
         let lms = res
             .iter()
             .filter(|i| is_lms(i))
             .map(|x| *x)
             .collect::<Vec<_>>();
+        dbg!(&lms);
         let m = lms.len();
         let mut idx = vec![None; n];
         idx[lms[0]] = Some(0);
@@ -146,6 +157,7 @@ impl Sort for SaIs {
         }
 
         let idx = idx.into_iter().filter_map(|x| x).collect::<Vec<_>>();
+        dbg!(&idx);
 
         // actual seed
         let seed = if count + 1 >= idx.len() {
@@ -155,36 +167,33 @@ impl Sort for SaIs {
             }
             r.into_iter().map(|x| res[x]).collect()
         } else {
-            let idx = &idx
-                .into_iter()
-                .map(|x| ('a' as u8 + x as u8) as char)
-                .collect::<String>();
-            SaIs::sort(idx)
-                .into_iter()
-                .map(|x| lms[idx.len() - x.len()])
-                .collect()
+            // let idx = &idx
+            //     .into_iter()
+            //     .map(|x|
+            //     // .map(|x| ('a' as u8 + x as u8) as char)
+            //     .collect::<Vec<T>>();
+            SaIs::sort(&idx)
         };
+
+        dbg!(&seed);
 
         // second sort
         eprintln!("second sort");
         let res = induced_sort(&s, &types, seed);
 
-        res.into_iter()
-            .map(|x| &raw[x..])
-            .filter(|&x| !x.is_empty())
-            .collect()
+        res.into_iter().filter(|&x| x != n).collect()
     }
 }
 
 /// String index
 #[derive(Debug)]
-pub struct SuffixArray<'a, S> {
+pub struct SuffixArray<T, S> {
     phantom: PhantomData<S>,
-    raw: &'a str,
-    inner: Vec<&'a str>,
+    raw: Vec<T>,
+    inner: Vec<usize>,
 }
 
-impl<'a, S: Sort> SuffixArray<'a, S> {
+impl<T: Ord + Clone, S: Sort<T>> SuffixArray<T, S> {
     /// build suffix array from &str
     ///
     /// sort all suffixes of `s`
@@ -194,29 +203,29 @@ impl<'a, S: Sort> SuffixArray<'a, S> {
     /// where
     /// - S = complexity of sort algorythm
     /// - K = length(s)
-    pub fn new(s: &'a str) -> Self {
+    pub fn new(s: &[T]) -> Self {
         Self {
             phantom: PhantomData,
-            raw: s,
+            raw: s.to_vec(),
             inner: S::sort(s),
         }
     }
 
-    pub fn raw(&self) -> &str {
-        self.raw
+    pub fn raw(&self) -> &[T] {
+        &self.raw
     }
 
     pub fn len(&self) -> usize {
         self.raw.len()
     }
 
-    fn suffix_nth(&self, n: usize) -> &str {
-        self.inner[n]
+    fn suffix_nth(&self, n: usize) -> &[T] {
+        &self.raw[self.inner[n]..]
     }
 
     /// Represents suffix array in its suffix's start indices
-    pub fn suffix_array(&self) -> Vec<usize> {
-        self.inner.iter().map(|&x| self.len() - x.len()).collect()
+    pub fn suffix_array(&self) -> &[usize] {
+        &self.inner
     }
 
     /// Returns all start index where t appears in s.
@@ -227,14 +236,14 @@ impl<'a, S: Sort> SuffixArray<'a, S> {
     ///
     /// where
     /// - K = length(s)
-    pub fn find<A: AsRef<str>>(&self, t: A) -> Vec<usize> {
-        let t = t.as_ref();
+    pub fn find<V: IntoVec<T>>(&self, t: V) -> Vec<usize> {
+        let t = t.into();
         let n = self.len();
         let mut l = 0;
         let mut r = n;
         while l + 1 < r {
             let m = (l + r) / 2;
-            if self.suffix_nth(m) < t {
+            if self.suffix_nth(m) < &t {
                 l = m;
             } else {
                 r = m;
@@ -243,29 +252,54 @@ impl<'a, S: Sort> SuffixArray<'a, S> {
 
         (r..n)
             .map(|x| self.suffix_nth(x))
-            .take_while(|&s| s.starts_with(t))
+            .take_while(|&s| s.starts_with(&t))
             .map(|s| n - s.len())
             .collect()
     }
 }
 
+impl<S: Sort<char>> SuffixArray<char, S> {
+    pub fn from_str(s: &String) -> Self {
+        let t = s.chars().collect::<Vec<char>>();
+        Self {
+            phantom: PhantomData,
+            inner: S::sort(&t),
+            raw: t,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
+    // use proconio::input;
+
     use super::{DefaultSort, SaIs, SuffixArray};
     #[test]
     fn basic() {
-        let s = "abracadabra";
-        let suffix_array = SuffixArray::<DefaultSort>::new(s);
+        let s = "abracadabra".to_string();
+        let suffix_array = SuffixArray::<char, DefaultSort>::from_str(&s);
         assert_eq!(suffix_array.find("br"), vec![8, 1]);
         assert_eq!(suffix_array.find("abra"), vec![7, 0]);
     }
 
     #[test]
     fn sa_is() {
-        let s = "mmiissiissiippii";
-        let suffix_array = SuffixArray::<SaIs>::new(s);
+        let s = "mmiissiissiippii".to_string();
+        let suffix_array = SuffixArray::<char, SaIs>::from_str(&s);
         for i in 0..s.len() - 1 {
             assert!(suffix_array.inner[i] < suffix_array.inner[i + 1]);
         }
     }
+
+    // #[test]
+    // fn xor_shift() {
+    //     input! {
+    //         n: usize,
+    //         a: [u32; n],
+    //         b: [u32; n],
+    //     }
+
+    //     let a2 = a.repeat(2);
+    //     let sa = SuffixArray::<SaIs>::new()
+    // }
 }

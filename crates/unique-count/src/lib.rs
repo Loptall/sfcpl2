@@ -11,7 +11,6 @@ impl<T: Ord + Clone> UniqueCount<T> for &[T] {
         for ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -22,7 +21,6 @@ impl<T: Ord + Clone> UniqueCount<T> for &[&T] {
         for &ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -33,7 +31,6 @@ impl<T: Ord + Clone> UniqueCount<T> for Vec<T> {
         for ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -44,7 +41,6 @@ impl<T: Ord + Clone> UniqueCount<T> for Vec<&T> {
         for &ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -66,7 +62,6 @@ impl<T: Ord + Clone> UniqueCount<T> for &Vec<&T> {
         for &ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -77,7 +72,6 @@ impl<T: Ord + Clone> UniqueCount<T> for VecDeque<T> {
         for ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -88,7 +82,6 @@ impl<T: Ord + Clone> UniqueCount<T> for VecDeque<&T> {
         for &ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -99,7 +92,6 @@ impl<T: Ord + Clone> UniqueCount<T> for &VecDeque<T> {
         for ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -110,7 +102,6 @@ impl<T: Ord + Clone> UniqueCount<T> for &VecDeque<&T> {
         for &ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -121,7 +112,6 @@ impl<T: Ord + Clone> UniqueCount<T> for BinaryHeap<T> {
         for ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -132,7 +122,6 @@ impl<T: Ord + Clone> UniqueCount<T> for BinaryHeap<&T> {
         for &ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -143,7 +132,6 @@ impl<T: Ord + Clone> UniqueCount<T> for &BinaryHeap<T> {
         for ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
-
         res
     }
 }
@@ -154,7 +142,16 @@ impl<T: Ord + Clone> UniqueCount<T> for &BinaryHeap<&T> {
         for &ele in self.iter() {
             *res.entry(ele.clone()).or_insert(0) += 1;
         }
+        res
+    }
+}
 
+impl UniqueCount<char> for &str {
+    fn unique_count(&self) -> BTreeMap<char, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.chars() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
         res
     }
 }

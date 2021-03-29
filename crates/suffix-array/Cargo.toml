@@ -9,3 +9,6 @@ edition = "2018"
 [dependencies]
 unique-count = { path = "../unique-count" }
 util = { path = "../util" }
+
+[dev-dependencies]
+proconio = "0.4.2"

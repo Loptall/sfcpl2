@@ -28,7 +28,7 @@ impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
         fn induced_sort<U: Ord + BoundedBelow + Clone>(
             s: &[U],
             types: &[bool],
-            seed: Vec<usize>,
+            seed: &[usize],
         ) -> Vec<usize> {
             let is_lms = |x: &usize| *x != 0 && types[*x] == S && types[*x - 1] == L;
             let is_l = |x: &usize| types[*x];
@@ -50,7 +50,7 @@ impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
 
             // find lms
             let mut inserted_lms = BTreeMap::<U, usize>::new();
-            for i in seed {
+            for &i in seed {
                 res[bin[&s[i]].1 - 1 - {
                     let h = inserted_lms.entry(s[i].clone()).or_default();
                     let r = *h;
@@ -58,7 +58,6 @@ impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
                     r
                 }] = Some(i);
             }
-            dbg!(&res);
 
             // find L
             let mut inserted_l = BTreeMap::<U, usize>::new();
@@ -78,7 +77,6 @@ impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
                     }
                 }
             }
-            dbg!(&res);
 
             // rfind S
             let mut inserted_s = BTreeMap::<U, usize>::new();
@@ -94,7 +92,6 @@ impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
                     }
                 }
             }
-            dbg!(&res);
 
             res.into_iter().filter_map(|x| x).collect()
         }
@@ -120,24 +117,21 @@ impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
             r
         };
 
-        let is_lms = |x: &usize| *x > 0 && types[*x] == S && types[*x - 1] == L;
+        let is_lms =
+            |x: &usize| *x >= types.len() - 1 || (*x > 0 && types[*x] == S && types[*x - 1] == L);
 
         // temporary seed
-        let seed = (1..n).filter(is_lms).collect::<Vec<_>>().shuffle();
+        let lmss = (0..n).filter(is_lms).collect::<Vec<_>>();
+        let seed = lmss.shuffle();
 
         // first sort
-        eprintln!("first sort");
-        dbg!(&s);
-        dbg!(&types);
-        dbg!(&seed);
-        let res = induced_sort(&s, &types, seed);
+        let res = induced_sort(&s, &types, &seed);
 
         let lms = res
             .iter()
-            .filter(|i| is_lms(i))
+            .filter(|&i| is_lms(i))
             .map(|x| *x)
             .collect::<Vec<_>>();
-        dbg!(&lms);
         let m = lms.len();
         let mut idx = vec![None; n];
         idx[lms[0]] = Some(0);
@@ -157,31 +151,22 @@ impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
         }
 
         let idx = idx.into_iter().filter_map(|x| x).collect::<Vec<_>>();
-        dbg!(&idx);
 
         // actual seed
-        let seed = if count + 1 >= idx.len() {
+        let seed: Vec<usize> = if count + 1 >= idx.len() {
             let mut r = vec![0; m];
             for (i, c) in idx.into_iter().enumerate() {
                 r[c] = i;
             }
             r.into_iter().map(|x| res[x]).collect()
         } else {
-            // let idx = &idx
-            //     .into_iter()
-            //     .map(|x|
-            //     // .map(|x| ('a' as u8 + x as u8) as char)
-            //     .collect::<Vec<T>>();
-            SaIs::sort(&idx)
+            let idx = idx.into_iter().take(m - 1).collect::<Vec<usize>>();
+            SaIs::sort(&idx).into_iter().map(|x| lms[x]).collect()
         };
 
-        dbg!(&seed);
-
         // second sort
-        eprintln!("second sort");
-        let res = induced_sort(&s, &types, seed);
-
-        res.into_iter().filter(|&x| x != n).collect()
+        let res = induced_sort(&s, &types, &seed);
+        res
     }
 }
 
@@ -287,7 +272,7 @@ mod test {
         let s = "mmiissiissiippii".to_string();
         let suffix_array = SuffixArray::<char, SaIs>::from_str(&s);
         for i in 0..s.len() - 1 {
-            assert!(suffix_array.inner[i] < suffix_array.inner[i + 1]);
+            assert!(suffix_array.suffix_nth(i) < suffix_array.suffix_nth(i + 1));
         }
     }
 

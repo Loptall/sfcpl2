@@ -158,7 +158,7 @@ impl<T: Ord + BoundedBelow + Clone + std::fmt::Debug> Sort<T> for SaIs {
             for (i, c) in idx.into_iter().enumerate() {
                 r[c] = i;
             }
-            r.into_iter().map(|x| res[x]).collect()
+            r.into_iter().map(|x| lms[x]).collect()
         } else {
             let idx = idx.into_iter().take(m - 1).collect::<Vec<usize>>();
             SaIs::sort(&idx).into_iter().map(|x| lms[x]).collect()
@@ -265,26 +265,25 @@ mod test {
         let suffix_array = SuffixArray::<char, DefaultSort>::from_str(&s);
         assert_eq!(suffix_array.find("br"), vec![8, 1]);
         assert_eq!(suffix_array.find("abra"), vec![7, 0]);
+
+        let s = "mmiissiissiippii".to_string();
+        let suffix_array = SuffixArray::<char, DefaultSort>::from_str(&s);
+        for i in 0..s.len() - 1 {
+            assert!(suffix_array.suffix_nth(i) < suffix_array.suffix_nth(i + 1));
+        }
     }
 
     #[test]
     fn sa_is() {
+        let s = "abracadabra".to_string();
+        let suffix_array = SuffixArray::<char, SaIs>::from_str(&s);
+        assert_eq!(suffix_array.find("br"), vec![8, 1]);
+        assert_eq!(suffix_array.find("abra"), vec![7, 0]);
+
         let s = "mmiissiissiippii".to_string();
         let suffix_array = SuffixArray::<char, SaIs>::from_str(&s);
         for i in 0..s.len() - 1 {
             assert!(suffix_array.suffix_nth(i) < suffix_array.suffix_nth(i + 1));
         }
     }
-
-    // #[test]
-    // fn xor_shift() {
-    //     input! {
-    //         n: usize,
-    //         a: [u32; n],
-    //         b: [u32; n],
-    //     }
-
-    //     let a2 = a.repeat(2);
-    //     let sa = SuffixArray::<SaIs>::new()
-    // }
 }

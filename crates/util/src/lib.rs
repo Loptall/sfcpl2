@@ -179,27 +179,543 @@ impl UniqueCount<char> for &str {
     }
 }
 
-fn shuffle<T>(v: &mut [T]) {
-    let mut rng = thread_rng();
-    for i in (1..v.len()).rev() {
-        v.swap(rng.gen_range(0..=i), i);
+impl UniqueCount<char> for String {
+    fn unique_count(&self) -> BTreeMap<char, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.chars() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
     }
 }
 
-pub trait Shuffle<T> {
-    fn shuffle(self) -> Self;
-}
-
-impl<T> Shuffle<T> for Vec<T> {
-    fn shuffle(mut self) -> Self {
-        shuffle(&mut self);
-        self
+impl UniqueCount<char> for &String {
+    fn unique_count(&self) -> BTreeMap<char, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.chars() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
     }
 }
 
-impl<T> Shuffle<T> for &mut [T] {
-    fn shuffle(self) -> Self {
-        shuffle(self);
-        self
+pub trait RunLengthEncoding<T> {
+    fn rle(&self) -> Vec<(T, usize)>;
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for &[T] {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for &[&T] {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for &e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for Vec<T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for Vec<&T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for &e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for &Vec<T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for &Vec<&T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for &e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for VecDeque<T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for VecDeque<&T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for &e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for &VecDeque<T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for &VecDeque<&T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for &e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for BinaryHeap<T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for BinaryHeap<&T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for &e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for &BinaryHeap<T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl<T: Clone + PartialEq> RunLengthEncoding<T> for &BinaryHeap<&T> {
+    fn rle(&self) -> Vec<(T, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for &e in self.iter() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap().clone(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl RunLengthEncoding<char> for &str {
+    fn rle(&self) -> Vec<(char, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.chars() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl RunLengthEncoding<char> for String {
+    fn rle(&self) -> Vec<(char, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.chars() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+impl RunLengthEncoding<char> for &String {
+    fn rle(&self) -> Vec<(char, usize)> {
+        let mut res = Vec::new();
+        let mut count = 0;
+        let mut last = None;
+        for e in self.chars() {
+            match last {
+                None => {
+                    last = Some(e);
+                    count += 1;
+                }
+                Some(old) if old == e => {
+                    count += 1;
+                }
+                Some(_) => {
+                    res.push((last.unwrap(), count));
+                    last = Some(e);
+                    count = 1;
+                }
+            }
+        }
+        res.push((last.unwrap().clone(), count));
+
+        res
+    }
+}
+
+// fn shuffle<T>(v: &mut [T]) {
+//     let mut rng = thread_rng();
+//     for i in (1..v.len()).rev() {
+//         v.swap(rng.gen_range(0..=i), i);
+//     }
+// }
+
+pub trait Shuffle: Sized {
+    fn shuffle_with<R: Rng>(&mut self, rng: &mut R);
+    fn shuffled_with<R: Rng>(self, rng: &mut R) -> Self {
+        let mut res = self;
+        res.shuffle_with(rng);
+        res
+    }
+    fn shuffle(&mut self) {
+        self.shuffle_with(&mut thread_rng());
+    }
+    fn shuffled(self) -> Self {
+        self.shuffled_with(&mut thread_rng())
+    }
+}
+
+impl<T> Shuffle for Vec<T> {
+    fn shuffle_with<R: Rng>(&mut self, rng: &mut R) {
+        for i in (1..self.len()).rev() {
+            self.swap(rng.gen_range(0..=i), i);
+        }
+    }
+}
+
+impl<T> Shuffle for VecDeque<T> {
+    fn shuffle_with<R: Rng>(&mut self, rng: &mut R) {
+        for i in (1..self.len()).rev() {
+            self.swap(rng.gen_range(0..=i), i);
+        }
+    }
+}
+
+impl Shuffle for String {
+    fn shuffle_with<R: Rng>(&mut self, rng: &mut R) {
+        let mut s = self.chars().collect::<Vec<_>>();
+        for i in (1..self.len()).rev() {
+            s.swap(rng.gen_range(0..=i), i);
+        }
+        *self = s.into_iter().collect();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RunLengthEncoding as _;
+    #[test]
+    fn test_rle() {
+        let v = vec![1, 2, 2, 3, 3, 3];
+        assert_eq!(v.rle(), vec![(1, 1), (2, 2), (3, 3)]);
     }
 }

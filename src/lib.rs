@@ -7,11 +7,10 @@ pub use graph::{
     DirectedUnweightedListGraph, ListGraph, UndirectedUnweightedListGraph, UnweightedListGraph,
 };
 pub use prime::{erathosthnes::Erathosthnes, Prime as _, Sieve as _};
-pub use run_length_encoding::RunLengthEncoding as _;
 pub use sparse_table::{Band, Max, Min, SparseTable};
 pub use util::{
     expand_range,
     math::ceil_pow,
     traits::{BoundedAbove, BoundedBelow},
-    Shuffle, UniqueCount,
+    RunLengthEncoding as _, Shuffle as _, UniqueCount as _,
 };

@@ -119,8 +119,7 @@ impl<T: Ord + BoundedBelow + Clone> Sort<T> for SaIs {
             |x: &usize| *x >= types.len() - 1 || (*x > 0 && types[*x] == S && types[*x - 1] == L);
 
         // temporary seed
-        let lmss = (0..n).filter(is_lms).collect::<Vec<_>>();
-        let seed = lmss.shuffle();
+        let seed = (0..n).filter(is_lms).collect::<Vec<_>>().shuffled();
 
         // first sort
         let res = induced_sort(&s, &types, &seed);

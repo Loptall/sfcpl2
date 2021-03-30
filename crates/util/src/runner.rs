@@ -44,6 +44,7 @@ impl Timer {
         self.duration_as_millis() as f64 / self.time_limit as f64
     }
 
+    /// Returns whether current time is over given time
     pub fn is_passed(&self, time_ms: u128) -> bool {
         time_ms <= self.duration_as_millis()
     }

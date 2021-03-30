@@ -131,7 +131,7 @@ fn factorize(mut x: usize) -> Factors {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::erathosthnes::Erathosthnes;
     use super::{Factors, Prime as _, Sieve as _};
     use rand::{thread_rng, Rng};

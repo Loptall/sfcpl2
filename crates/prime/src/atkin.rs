@@ -96,7 +96,7 @@ impl Atkin {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::Atkin;
 
     #[test]

@@ -53,7 +53,7 @@ impl Iterator for BruteBits {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::BruteBitsBuilder;
 
     #[test]

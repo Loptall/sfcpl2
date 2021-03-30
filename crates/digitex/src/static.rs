@@ -39,7 +39,7 @@ impl Display for Digit {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::Digit;
 
     #[test]

@@ -82,7 +82,7 @@ impl<'a> Iterator for Primes {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::Erathosthnes;
 
     #[test]

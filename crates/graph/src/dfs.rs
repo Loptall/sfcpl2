@@ -69,7 +69,7 @@ impl<'a, D: Direct> Dfsable<'a, Vec<bool>, usize> for UnweightedListGraph<D> {
     }
 }
 #[cfg(test)]
-mod test {
+mod tests {
     use super::super::UndirectedUnweightedListGraph;
     use super::Dfsable as _;
     #[test]

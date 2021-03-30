@@ -49,7 +49,7 @@ impl<T: Clone + PartialEq> RunLengthEncoding<T> for &Vec<T> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::RunLengthEncoding as _;
     #[test]
     fn test_rle() {

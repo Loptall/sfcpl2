@@ -36,7 +36,7 @@ impl<const BASE: u32> Display for Digit<BASE> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::Digit;
 
     #[test]

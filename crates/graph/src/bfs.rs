@@ -86,7 +86,7 @@ impl<'a, D: Direct> Bfsable<'a, Vec<Option<usize>>, usize> for UnweightedListGra
     }
 }
 #[cfg(test)]
-mod test {
+mod tests {
     use super::super::UndirectedUnweightedListGraph;
     use super::Bfsable as _;
     #[test]

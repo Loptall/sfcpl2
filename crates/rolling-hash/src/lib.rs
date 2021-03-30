@@ -148,7 +148,7 @@ impl<B: Base> RollingHash<B, char> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::{Base, RandomBase, RollingHash};
     use rand::{thread_rng, Rng};
 

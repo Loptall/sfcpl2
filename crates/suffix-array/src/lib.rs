@@ -311,7 +311,7 @@ impl<S: Sort<char>> SuffixArray<char, S> {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::{DefaultSort, SaIs, SuffixArray};
 
     #[test]

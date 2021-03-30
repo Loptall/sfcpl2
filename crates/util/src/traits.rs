@@ -1,4 +1,3 @@
-
 pub trait IntoVec<T> {
     fn into(self) -> Vec<T>;
 }

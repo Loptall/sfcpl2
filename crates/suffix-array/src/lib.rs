@@ -215,11 +215,11 @@ impl<T: Ord + Clone, S: Sort<T>> SuffixArray<T, S> {
     /// If you want to build from str type,
     /// you can use 1SuffixArray::from_str()1
     ///
-    /// Complexity: O(SK)
+    /// Complexity: O(NS)
     ///
     /// where
     /// - S = complexity of sort algorythm
-    /// - K = length(s)
+    /// - N = length(s)
     pub fn new(s: &[T]) -> Self {
         let inner = S::sort(s);
         Self {
@@ -262,10 +262,11 @@ impl<T: Ord + Clone, S: Sort<T>> SuffixArray<T, S> {
     ///
     /// Be careful that returned vector is not sorted.
     ///
-    /// Complexity: O(log K)
+    /// Complexity: O(M log N)
     ///
     /// where
-    /// - K = length(s)
+    /// - N = length(s)
+    /// - M = length(t)
     pub fn find<V: IntoVec<T>>(&self, t: V) -> &[usize] {
         let t = t.into();
         let n = self.len();

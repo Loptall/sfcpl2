@@ -44,9 +44,13 @@ impl Timer {
         self.duration_as_millis() as f64 / self.time_limit as f64
     }
 
+    pub fn is_passed(&self, time_ms: u128) -> bool {
+        time_ms <= self.duration_as_millis()
+    }
+
     /// Returns whether current time is in margin time
     pub fn should_exit(&self) -> bool {
-        self.time_limit - self.duration_as_millis() <= self.margin_time
+        self.is_passed(self.time_limit - self.margin_time)
     }
 
     /// Call the task repeatedly

@@ -17,9 +17,10 @@ brute-bits = { path = "./crates/brute-bits" }
 digitex = { path = "./crates/digitex", features = ["atcoder"] }
 graph = { path = "./crates/graph" }
 prime = { path = "./crates/prime" }
-run-length-encoding = { path = "./crates/run-length-encoding" }
 rolling-hash = { path = "./crates/rolling-hash" }
+runner = { path = "./crates/runner" }
 sparse-table = { path = "./crates/sparse-table" }
+suffix-array = { path = "./crates/suffix-array" }
 util = { path = "./crates/util" }
 
 [dev-dependencies]

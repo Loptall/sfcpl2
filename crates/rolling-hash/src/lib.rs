@@ -10,7 +10,7 @@ pub trait Base {
 }
 
 #[derive(Debug)]
-struct RandomBase;
+pub struct RandomBase;
 
 impl Base for RandomBase {
     fn base() -> u64 {
@@ -25,6 +25,8 @@ pub struct RollingHash<B, T> {
     pow_of_base: Vec<u64>,
     hashed: Vec<u64>,
 }
+
+pub type RandomBaseRollingHash<T> = RollingHash<RandomBase, T>;
 
 impl<B: Base, S: AsRef<str>> From<S> for RollingHash<B, char> {
     fn from(s: S) -> Self {

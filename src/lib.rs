@@ -9,4 +9,4 @@ pub use graph::{
 pub use prime::{erathosthnes::Erathosthnes, Prime as _, Sieve as _};
 pub use run_length_encoding::RunLengthEncoding as _;
 pub use sparse_table::{Band, Max, Min, SparseTable};
-pub use unique_count::UniqueCount as _;
+pub use util::{ceil_pow, expand_range, BoundedAbove, BoundedBelow, Shuffle, UniqueCount};

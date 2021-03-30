@@ -20,7 +20,7 @@ prime = { path = "./crates/prime" }
 run-length-encoding = { path = "./crates/run-length-encoding" }
 rolling-hash = { path = "./crates/rolling-hash" }
 sparse-table = { path = "./crates/sparse-table" }
-unique-count = { path = "./crates/unique-count" }
+util = { path = "./crates/util" }
 
 [dev-dependencies]
 rand = "0.8.3"

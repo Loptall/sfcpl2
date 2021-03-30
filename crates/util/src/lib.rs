@@ -1,8 +1,12 @@
 //! This crate includes utility functions used by other workspace crates
 
-use std::char;
+use std::collections::{BTreeMap, BinaryHeap, VecDeque};
 
 use rand::{thread_rng, Rng};
+
+pub mod math;
+pub mod runner;
+pub mod traits;
 
 /// convert (from..to) into (from, to)
 pub fn expand_range<R: std::ops::RangeBounds<usize>>(range: R, max: usize) -> (usize, usize) {
@@ -19,9 +23,160 @@ pub fn expand_range<R: std::ops::RangeBounds<usize>>(range: R, max: usize) -> (u
     (from, to)
 }
 
-/// return minimum `p` which applies `n <= 2 ^ p`
-pub fn ceil_pow(n: usize) -> usize {
-    n.next_power_of_two().trailing_zeros() as usize
+pub trait UniqueCount<T> {
+    /// count the number of each value in self
+    fn unique_count(&self) -> BTreeMap<T, usize>;
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for &[T] {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for &[&T] {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for &ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for Vec<T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for Vec<&T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for &ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for &Vec<T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for &Vec<&T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for &ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for VecDeque<T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for VecDeque<&T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for &ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for &VecDeque<T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for &VecDeque<&T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for &ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for BinaryHeap<T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for BinaryHeap<&T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for &ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for &BinaryHeap<T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl<T: Ord + Clone> UniqueCount<T> for &BinaryHeap<&T> {
+    fn unique_count(&self) -> BTreeMap<T, usize> {
+        let mut res = BTreeMap::new();
+        for &ele in self.iter() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
+}
+
+impl UniqueCount<char> for &str {
+    fn unique_count(&self) -> BTreeMap<char, usize> {
+        let mut res = BTreeMap::new();
+        for ele in self.chars() {
+            *res.entry(ele.clone()).or_insert(0) += 1;
+        }
+        res
+    }
 }
 
 fn shuffle<T>(v: &mut [T]) {
@@ -46,118 +201,5 @@ impl<T> Shuffle<T> for &mut [T] {
     fn shuffle(self) -> Self {
         shuffle(self);
         self
-    }
-}
-
-pub trait IntoVec<T> {
-    fn into(self) -> Vec<T>;
-}
-
-impl IntoVec<char> for &str {
-    fn into(self) -> Vec<char> {
-        self.chars().collect()
-    }
-}
-
-impl IntoVec<char> for &&str {
-    fn into(self) -> Vec<char> {
-        self.chars().collect()
-    }
-}
-
-impl IntoVec<char> for String {
-    fn into(self) -> Vec<char> {
-        self.chars().collect()
-    }
-}
-
-impl IntoVec<char> for &String {
-    fn into(self) -> Vec<char> {
-        self.chars().collect()
-    }
-}
-
-impl<T: Clone> IntoVec<T> for &[T] {
-    fn into(self) -> Vec<T> {
-        self.to_vec()
-    }
-}
-
-impl<T: Clone> IntoVec<T> for Vec<T> {
-    fn into(self) -> Vec<T> {
-        self
-    }
-}
-
-impl<T: Clone> IntoVec<T> for &Vec<T> {
-    fn into(self) -> Vec<T> {
-        self.clone()
-    }
-}
-/// Class that has additive identity element
-pub trait Zero {
-    /// The additive identity element
-    fn zero() -> Self;
-}
-
-/// Class that has multiplicative identity element
-pub trait One {
-    /// The multiplicative identity element
-    fn one() -> Self;
-}
-
-pub trait BoundedBelow {
-    fn min_value() -> Self;
-}
-
-pub trait BoundedAbove {
-    fn max_value() -> Self;
-}
-
-macro_rules! impl_integral {
-    ($($ty:ty),*) => {
-        $(
-            impl Zero for $ty {
-                #[inline]
-                fn zero() -> Self {
-                    0
-                }
-            }
-
-            impl One for $ty {
-                #[inline]
-                fn one() -> Self {
-                    1
-                }
-            }
-
-            impl BoundedBelow for $ty {
-                #[inline]
-                fn min_value() -> Self {
-                    Self::min_value()
-                }
-            }
-
-            impl BoundedAbove for $ty {
-                #[inline]
-                fn max_value() -> Self {
-                    Self::max_value()
-                }
-            }
-        )*
-    };
-}
-
-impl_integral!(i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize);
-
-impl BoundedAbove for char {
-    fn max_value() -> Self {
-        std::u8::MAX as char
-    }
-}
-
-impl BoundedBelow for char {
-    fn min_value() -> Self {
-        std::u8::MIN as char
     }
 }

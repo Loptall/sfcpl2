@@ -1,7 +1,9 @@
 use std::{collections::BTreeMap, marker::PhantomData};
 
-use unique_count::UniqueCount as _;
-use util::{BoundedBelow, IntoVec, Shuffle as _};
+use util::{
+    traits::{BoundedBelow, IntoVec},
+    Shuffle as _, UniqueCount as _,
+};
 
 pub trait Sort<T> {
     fn sort(s: &[T]) -> Vec<usize>;

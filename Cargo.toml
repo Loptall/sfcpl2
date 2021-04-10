@@ -6,10 +6,9 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/Loptall/sfcpl2"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [workspace]
-members = ["crates/*"]
+members = ["./crates/*", "./xtask"]
+exclude = []
 
 [dependencies]
 bitset = { path = "./crates/bitset" }

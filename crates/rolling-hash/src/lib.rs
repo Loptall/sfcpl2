@@ -137,7 +137,7 @@ impl<B: Base> RollingHash<B, char> {
         let base = B::base();
         let pow_of_base = powering(base, s.len());
 
-        let t = s.iter().map(|x| x.clone().into()).collect::<Vec<u128>>();
+        let t = s.iter().map(|&x| x as u8 as u128).collect::<Vec<u128>>();
         let hashed = rolling(&t, base);
 
         Self {

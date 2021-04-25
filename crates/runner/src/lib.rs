@@ -1,10 +1,13 @@
-pub use util::timer::Timer;
+pub mod timer;
+pub use timer::Timer;
 
 type OnExit = bool;
 
 /// Repeat calling function with timer
 pub struct TaskRunner {
     timer: Timer,
+    time_limit: u128,
+    margin_time: u128,
     check_interval: usize,
 }
 
@@ -12,17 +15,36 @@ impl TaskRunner {
     /// Initialize with new timer instance
     pub fn new(time_limit: u128, margin_time: u128, check_interval: usize) -> Self {
         Self {
-            timer: Timer::new(time_limit, margin_time),
+            timer: Timer::new(),
+            time_limit,
+            margin_time,
             check_interval,
         }
     }
 
     /// Initialize using other timer
-    pub fn use_timer(timer: Timer, check_interval: usize) -> Self {
+    pub fn with_timer(
+        timer: Timer,
+        time_limit: u128,
+        margin_time: u128,
+        check_interval: usize,
+    ) -> Self {
         Self {
             timer,
+            time_limit,
+            margin_time,
             check_interval,
         }
+    }
+
+    /// Get duration ratio for the time limit
+    pub fn duration_as_ratio(&self) -> f64 {
+        self.timer.duration_as_millis() as f64 / self.time_limit as f64
+    }
+
+    /// Returns whether current time is in margin time
+    pub fn should_exit(&self) -> bool {
+        self.timer.is_passed(self.time_limit - self.margin_time)
     }
 
     /// Call the task repeatedly
@@ -52,7 +74,7 @@ impl TaskRunner {
         let mut loop_count = 0usize;
         loop {
             if loop_count % self.check_interval == 0 {
-                if self.timer.should_exit() {
+                if self.should_exit() {
                     task(true);
                     std::process::exit(0);
                 }

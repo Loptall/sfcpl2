@@ -11,7 +11,7 @@ members = ["./crates/*"]
 exclude = []
 
 [features]
-atcoder = ["digitex/atcoder"]
+# atcoder = ["digitex/atcoder"]
 
 [dependencies]
 bitset = { path = "./crates/bitset" }

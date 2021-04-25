@@ -8,7 +8,7 @@ pub use graph::{
 };
 pub use prime::{erathosthnes::Erathosthnes, Prime as _, Sieve as _};
 pub use rolling_hash::RandomBaseRollingHash as RollingHash;
-pub use runner::{TaskRunner, Timer};
+pub use runner::{TaskRunner, timer::Timer};
 pub use sparse_table::{Band, Max, Min, SparseTable};
 pub use suffix_array::{DefaultSort, SaIs, SuffixArray};
 pub use util::{

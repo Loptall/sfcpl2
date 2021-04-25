@@ -5,7 +5,6 @@ use std::collections::{BTreeMap, BinaryHeap, VecDeque};
 use rand::{thread_rng, Rng};
 
 pub mod math;
-pub mod timer;
 pub mod traits;
 
 /// convert (from..to) into (from, to)

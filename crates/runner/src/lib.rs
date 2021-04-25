@@ -84,7 +84,7 @@ impl TaskRunner {
         }
     }
 
-    /// Call the task repeatedly
+    /// Call the task repeatedly in given time
     ///
     /// While timer value is less than exit_time.
     ///
@@ -98,10 +98,10 @@ impl TaskRunner {
     /// let mut i = 0usize;
     /// let f = || i += 1;
     ///
-    /// let looped = runner.run_while(f, 100).unwrap();
+    /// let looped = runner.run_while(f, 100);
     /// assert_eq!(looped, i);
     /// ```
-    pub fn run_while<F: FnMut()>(self, mut task: F, exit_time: u128) -> Result<usize, ()> {
+    pub fn run_while<F: FnMut()>(self, mut task: F, exit_time: u128) -> usize {
         let mut loop_count = 0usize;
         loop {
             if loop_count % self.check_interval == 0 {
@@ -113,7 +113,35 @@ impl TaskRunner {
             loop_count += 1;
         }
 
-        Ok(loop_count)
+        loop_count
+    }
+
+    /// Call the task repeatedly for given times
+    ///
+    /// While timer value is less than exit_time.
+    ///
+    /// margin_time is not apllied
+    ///
+    /// ```
+    /// use runner::TaskRunner;
+    ///
+    /// let runner = TaskRunner::new(100, 20, 1);
+    ///
+    /// let mut i = 0usize;
+    /// let f = || i += 1;
+    ///
+    /// let looped = runner.run_for(f, 100);
+    /// assert_eq!(looped, 100);
+    /// assert_eq!(looped, i);
+    /// ```
+    pub fn run_for<F: FnMut()>(self, mut task: F, n: u128) -> usize {
+        let mut loop_count = 0usize;
+        for _ in 0..n {
+            task();
+            loop_count += 1;
+        }
+
+        loop_count
     }
 }
 
@@ -149,7 +177,7 @@ mod tests {
         let mut i = 0usize;
         let f = || i += 1;
 
-        let looped = runner.run_while(f, 100)?;
+        let looped = runner.run_while(f, 100);
         assert_eq!(looped, i);
         Ok(())
     }

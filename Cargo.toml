@@ -11,12 +11,12 @@ members = ["./crates/*"]
 exclude = []
 
 [features]
-atcoder = ["digitex/atcoder"]
+# atcoder = ["digitex/atcoder"]
 
 [dependencies]
 bitset = { path = "./crates/bitset" }
 brute-bits = { path = "./crates/brute-bits" }
-digitex = { path = "./crates/digitex" }
+# digitex = { path = "./crates/digitex" }
 graph = { path = "./crates/graph" }
 prime = { path = "./crates/prime" }
 rolling-hash = { path = "./crates/rolling-hash" }

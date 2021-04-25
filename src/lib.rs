@@ -1,6 +1,6 @@
 pub use bitset::BitSet;
 pub use brute_bits::BruteBitsBuilder;
-pub use digitex::StaticDigit as Digit;
+// pub use digitex::StaticDigit as Digit;
 pub use graph::{
     bfs::{Bfs, Bfsable as _},
     dfs::{Dfs, Dfsable as _},

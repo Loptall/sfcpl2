@@ -6,7 +6,7 @@ use util::ExpandRange;
 const ZERO: usize = 0;
 const LIM: usize = std::usize::MAX;
 
-pub fn binary_search_by<T, R, F>(r: R, f: F) -> T
+pub fn binary_search_range_by<T, R, F>(r: R, f: F) -> T
 where
     T: ExpandRange + From<usize> + Average + Clone,
     R: RangeBounds<T>,
@@ -28,16 +28,19 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::binary_search_by;
+    use super::binary_search_range_by;
 
     #[test]
     fn binary_search_basic() {
-        assert_eq!(binary_search_by(0usize..10, |&x| x < 5), 4);
+        assert_eq!(binary_search_range_by(0usize..10, |&x| x < 5), 4);
     }
 
     #[test]
     fn binary_search_large() {
-        assert_eq!(binary_search_by(0usize..1000000000, |&x| x * x < 300), 17); // 17 * 17 = 289 < 300
-        assert_eq!(binary_search_by(0usize.., |&x| x < 300), 299);
+        assert_eq!(
+            binary_search_range_by(0usize..1000000000, |&x| x * x < 300),
+            17
+        ); // 17 * 17 = 289 < 300
+        assert_eq!(binary_search_range_by(0usize.., |&x| x < 300), 299);
     }
 }

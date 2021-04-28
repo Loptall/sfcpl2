@@ -8,19 +8,43 @@ pub mod math;
 pub mod traits;
 
 /// convert (from..to) into (from, to)
-pub fn expand_range<R: std::ops::RangeBounds<usize>>(range: R, max: usize) -> (usize, usize) {
-    let from = match range.start_bound() {
-        std::ops::Bound::Included(&from) => from,
-        std::ops::Bound::Excluded(&from) => from + 1,
-        std::ops::Bound::Unbounded => 0,
-    };
-    let to = match range.end_bound() {
-        std::ops::Bound::Included(&end) => end + 1,
-        std::ops::Bound::Excluded(&end) => end,
-        std::ops::Bound::Unbounded => max,
-    };
-    (from, to)
+pub trait ExpandRange: Sized {
+    fn expand_range<R: std::ops::RangeBounds<Self>>(range: R, min: Self, max: Self) -> (Self, Self);
 }
+
+macro_rules! impl_expand_range {
+    ($t:ty) => {
+        impl ExpandRange for $t {
+            /// convert (from..to) into (from, to)
+            fn expand_range<R: std::ops::RangeBounds<Self>>(range: R, min: Self, max: Self) -> (Self, Self) {
+                let from = match range.start_bound() {
+                    std::ops::Bound::Included(&from) => from,
+                    std::ops::Bound::Excluded(&from) => from + 1,
+                    std::ops::Bound::Unbounded => min,
+                };
+                let to = match range.end_bound() {
+                    std::ops::Bound::Included(&end) => end + 1,
+                    std::ops::Bound::Excluded(&end) => end,
+                    std::ops::Bound::Unbounded => max,
+                };
+                (from, to)
+            }
+        }
+    };
+}
+
+impl_expand_range!(usize);
+impl_expand_range!(u8);
+impl_expand_range!(u16);
+impl_expand_range!(u32);
+impl_expand_range!(u64);
+impl_expand_range!(u128);
+impl_expand_range!(i8);
+impl_expand_range!(i16);
+impl_expand_range!(i32);
+impl_expand_range!(i64);
+impl_expand_range!(i128);
+// impl_expand_range!(char); neeeded?
 
 pub trait UniqueCount<T> {
     /// count the number of each value in self

@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, RangeBounds, Sub};
+use std::ops::RangeBounds;
 
 use super::Average;
 use util::ExpandRange;

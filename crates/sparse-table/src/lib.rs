@@ -4,7 +4,7 @@ use std::{
     ops::RangeBounds,
 };
 
-use util::{expand_range, math::ceil_pow};
+use util::{math::ceil_pow, ExpandRange};
 
 /// Binary operation which applies,
 ///
@@ -95,7 +95,7 @@ impl<B: Band> SparseTable<B> {
     where
         R: RangeBounds<usize>,
     {
-        let (from, to) = expand_range(range, self.len());
+        let (from, to) = ExpandRange::expand_range(range, 0, self.len());
         self.fold_sub(from, to)
     }
 }

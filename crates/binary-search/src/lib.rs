@@ -1,5 +1,7 @@
-pub mod slice;
+use std::ops::{Add, Div, Sub};
+
 pub mod range;
+pub mod slice;
 
 pub trait Average:
     Add<Output = Self> + Sub<Output = Self> + Div<Output = Self> + PartialOrd + Sized

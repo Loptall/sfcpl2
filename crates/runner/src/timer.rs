@@ -34,5 +34,4 @@ impl Timer {
     pub fn is_passed(&self, time_ms: u128) -> bool {
         time_ms <= self.duration_as_millis()
     }
-
 }

@@ -9,14 +9,19 @@ pub mod traits;
 
 /// convert (from..to) into (from, to)
 pub trait ExpandRange: Sized {
-    fn expand_range<R: std::ops::RangeBounds<Self>>(range: R, min: Self, max: Self) -> (Self, Self);
+    fn expand_range<R: std::ops::RangeBounds<Self>>(range: R, min: Self, max: Self)
+        -> (Self, Self);
 }
 
 macro_rules! impl_expand_range {
     ($t:ty) => {
         impl ExpandRange for $t {
             /// convert (from..to) into (from, to)
-            fn expand_range<R: std::ops::RangeBounds<Self>>(range: R, min: Self, max: Self) -> (Self, Self) {
+            fn expand_range<R: std::ops::RangeBounds<Self>>(
+                range: R,
+                min: Self,
+                max: Self,
+            ) -> (Self, Self) {
                 let from = match range.start_bound() {
                     std::ops::Bound::Included(&from) => from,
                     std::ops::Bound::Excluded(&from) => from + 1,

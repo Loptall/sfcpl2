@@ -1,7 +1,7 @@
 use std::{cmp::min, marker::PhantomData, ops::RangeBounds};
 
 use rand::{thread_rng, Rng};
-use util::expand_range;
+use util::ExpandRange;
 
 const MOD: u64 = (1 << 61) - 1;
 
@@ -75,7 +75,7 @@ impl<B: Base, T> RollingHash<B, T> {
     }
 
     pub fn hash<R: RangeBounds<usize>>(&self, range: R) -> u64 {
-        let (from, to) = expand_range(range, self.hashed.len());
+        let (from, to) = ExpandRange::expand_range(range, 0, self.hashed.len());
         self.hash_sub(from, to)
     }
 
@@ -84,8 +84,8 @@ impl<B: Base, T> RollingHash<B, T> {
         R1: RangeBounds<usize>,
         R2: RangeBounds<usize>,
     {
-        let (from1, to1) = expand_range(range1, self.len());
-        let (from2, to2) = expand_range(range2, self.len());
+        let (from1, to1) = ExpandRange::expand_range(range1, 0, self.len());
+        let (from2, to2) = ExpandRange::expand_range(range2, 0, self.len());
         let mut l = 0;
         let mut r = min(to1 - from1, to2 - from2) + 1;
         while l + 1 < r {
@@ -104,8 +104,8 @@ impl<B: Base, T> RollingHash<B, T> {
         R1: RangeBounds<usize>,
         R2: RangeBounds<usize>,
     {
-        let (from1, to1) = expand_range(range1, self.len());
-        let (from2, to2) = expand_range(range2, self.len());
+        let (from1, to1) = ExpandRange::expand_range(range1, 0, self.len());
+        let (from2, to2) = ExpandRange::expand_range(range2, 0, self.len());
 
         (to1 - from1) == (to2 - from2) && self.hash_sub(from1, to1) == self.hash_sub(from2, to2)
     }

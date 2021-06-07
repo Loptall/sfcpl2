@@ -715,7 +715,7 @@ pub trait Shuffle: Sized {
 impl<T> Shuffle for Vec<T> {
     fn shuffle_with<R: Rng>(&mut self, rng: &mut R) {
         for i in (1..self.len()).rev() {
-            self.swap(rng.gen_range(0,i + 1), i);
+            self.swap(rng.gen_range(0, i + 1), i);
         }
     }
 }

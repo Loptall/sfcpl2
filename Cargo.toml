@@ -11,12 +11,12 @@ members = ["./crates/*"]
 exclude = []
 
 [features]
-# atcoder = ["digitex/atcoder"]
+atcoder = ["digitex/atcoder"]
 
 [dependencies]
 bitset = { path = "./crates/bitset" }
 brute-bits = { path = "./crates/brute-bits" }
-# digitex = { path = "./crates/digitex" }
+digitex = { path = "./crates/digitex" }
 graph = { path = "./crates/graph" }
 prime = { path = "./crates/prime" }
 rolling-hash = { path = "./crates/rolling-hash" }
@@ -27,5 +27,3 @@ util = { path = "./crates/util" }
 
 [dev-dependencies]
 rand = "=0.7.3"
-ac-library-rs-parted = { git = "https://github.com/qryxip/ac-library-rs-parted.git" }
-proconio = "0.4.2"

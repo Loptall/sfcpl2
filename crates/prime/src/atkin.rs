@@ -1,4 +1,4 @@
-use bitset::BitSet;
+use ::bitset::BitSet;
 
 /// Atkin's Sieve
 ///

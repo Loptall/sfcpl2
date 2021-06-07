@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use bitset::BitSet;
+use ::bitset::BitSet;
 
 pub struct Erathosthnes {
     n: usize,

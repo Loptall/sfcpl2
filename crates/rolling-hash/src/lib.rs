@@ -1,7 +1,7 @@
 use std::{cmp::min, marker::PhantomData, ops::RangeBounds};
 
 use rand::{thread_rng, Rng};
-use util::ExpandRange;
+use ::util::ExpandRange;
 
 const MOD: u64 = (1 << 61) - 1;
 

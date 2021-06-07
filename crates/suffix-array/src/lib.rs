@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, marker::PhantomData};
 
-use util::{
+use ::util::{
     traits::{BoundedBelow, IntoVec},
     Shuffle as _, UniqueCount as _,
 };

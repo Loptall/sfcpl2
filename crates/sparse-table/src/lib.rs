@@ -4,7 +4,7 @@ use std::{
     ops::RangeBounds,
 };
 
-use util::{math::ceil_pow, ExpandRange};
+use ::util::{math::ceil_pow, ExpandRange};
 
 /// Binary operation which applies,
 ///

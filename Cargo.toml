@@ -10,10 +10,13 @@ repository = "https://github.com/Loptall/sfcpl2"
 members = ["./crates/*"]
 exclude = []
 
+[features]
+atcoder = ["digitex/atcoder"]
+
 [dependencies]
 bitset = { path = "./crates/bitset" }
 brute-bits = { path = "./crates/brute-bits" }
-digitex = { path = "./crates/digitex", features = ["atcoder"] }
+digitex = { path = "./crates/digitex" }
 graph = { path = "./crates/graph" }
 prime = { path = "./crates/prime" }
 rolling-hash = { path = "./crates/rolling-hash" }

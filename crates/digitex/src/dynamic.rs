@@ -1,5 +1,3 @@
-use std::fmt::Display;
-
 use super::into;
 
 pub struct Digit<const BASE: u32> {

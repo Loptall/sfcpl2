@@ -14,7 +14,7 @@ pub struct RandomBase;
 
 impl Base for RandomBase {
     fn base() -> u64 {
-        thread_rng().gen_range(2..=MOD)
+        thread_rng().gen_range(2, MOD)
     }
 }
 
@@ -179,8 +179,8 @@ mod tests {
         let rh = RollingHash::<Base2, _>::from_str(s.clone()); // from chars
 
         for _ in 0..10000 {
-            let mut a = rng.gen_range(0..=n);
-            let mut b = rng.gen_range(0..=n);
+            let mut a = rng.gen_range(0, n + 1);
+            let mut b = rng.gen_range(0, n + 1);
             if a == b {
                 continue;
             }
@@ -188,7 +188,7 @@ mod tests {
                 std::mem::swap(&mut a, &mut b);
             }
 
-            let shift = rng.gen_range(0..=rh.len() - b);
+            let shift = rng.gen_range(0, rh.len() - b + 1);
             let c = a + shift;
             let d = b + shift;
 

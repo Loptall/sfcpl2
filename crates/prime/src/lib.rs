@@ -177,7 +177,7 @@ mod tests {
     fn factorize_random() {
         let mut rng = thread_rng();
         for _ in 0..1000 {
-            let r = rng.gen_range(2usize..100000);
+            let r = rng.gen_range(2usize, 100000);
             let f = r.factorize();
             assert_eq!(r, restore_factors(f));
         }
@@ -206,7 +206,7 @@ mod tests {
         let mut rng = thread_rng();
         let mut sieve = Erathosthnes::new(100000);
         for _ in 0..1000 {
-            let r = rng.gen_range(2usize..100000);
+            let r = rng.gen_range(2usize, 100000);
             let f = sieve.factorize(r);
             assert_eq!(r, restore_factors(f));
         }

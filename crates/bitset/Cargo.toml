@@ -9,4 +9,4 @@ repository = "https://github.com/Loptall/sfcpl2"
 [dependencies]
 
 [dev-dependencies]
-rand = "0.8.3"
+rand = "=0.7.3"

@@ -8,4 +8,4 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/Loptall/sfcpl2"
 
 [dependencies]
-rand = "0.8.3"
+rand = "=0.7.3"

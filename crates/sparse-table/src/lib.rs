@@ -131,8 +131,8 @@ mod tests {
         let n = v.len();
         let sparse_table = SparseTable::<Min<_>>::new(&v);
         for _ in 0..100 {
-            let mut a = rng.gen_range(0..=n);
-            let mut b = rng.gen_range(0..=n);
+            let mut a = rng.gen_range(0, n + 1);
+            let mut b = rng.gen_range(0, n + 1);
             if a == b {
                 continue;
             }

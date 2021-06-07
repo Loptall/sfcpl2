@@ -715,7 +715,7 @@ pub trait Shuffle: Sized {
 impl<T> Shuffle for Vec<T> {
     fn shuffle_with<R: Rng>(&mut self, rng: &mut R) {
         for i in (1..self.len()).rev() {
-            self.swap(rng.gen_range(0..=i), i);
+            self.swap(rng.gen_range(0,i + 1), i);
         }
     }
 }
@@ -723,7 +723,7 @@ impl<T> Shuffle for Vec<T> {
 impl<T> Shuffle for VecDeque<T> {
     fn shuffle_with<R: Rng>(&mut self, rng: &mut R) {
         for i in (1..self.len()).rev() {
-            self.swap(rng.gen_range(0..=i), i);
+            self.swap(rng.gen_range(0, i + 1), i);
         }
     }
 }
@@ -732,7 +732,7 @@ impl Shuffle for String {
     fn shuffle_with<R: Rng>(&mut self, rng: &mut R) {
         let mut s = self.chars().collect::<Vec<_>>();
         for i in (1..self.len()).rev() {
-            s.swap(rng.gen_range(0..=i), i);
+            s.swap(rng.gen_range(0, i + 1), i);
         }
         *self = s.into_iter().collect();
     }

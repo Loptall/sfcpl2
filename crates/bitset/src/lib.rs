@@ -639,7 +639,7 @@ mod tests {
 
         let mut pops = BTreeSet::new();
         for _ in (0..).take(10000) {
-            let r: usize = rng.gen_range(0..limit);
+            let r: usize = rng.gen_range(0, limit);
             pops.insert(r);
             bs.entry(r);
         }
